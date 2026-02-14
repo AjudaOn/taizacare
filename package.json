@@ -1,0 +1,14 @@
+{
+  "name": "taizacare",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "install:layout": "npm --prefix layout install",
+    "dev": "npm --prefix layout run dev",
+    "build": "npm --prefix layout run build",
+    "start": "npm --prefix layout run start",
+    "typecheck": "npm --prefix layout run typecheck",
+    "test": "npm --prefix layout run test"
+  }
+}
+

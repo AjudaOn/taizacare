@@ -1,0 +1,17 @@
+.DS_Store
+
+# Local agent setup
+.agent/
+
+# Local env / secrets
+layout/.env
+
+# SQLite data
+layout/data/
+
+# Build outputs
+layout/dist/
+
+# Dependencies
+layout/node_modules/
+node_modules/
