@@ -904,8 +904,14 @@ export default function Index() {
               >
                 Webdeveloper: AjudaOn
               </a>
-              <span>Instagram</span>
-              <span>Pinterest</span>
+              <a
+                href="https://www.instagram.com/taizapelvica?igsh=djJuaDkxd3lldmk3"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-[#afa498] transition-colors"
+              >
+                Instagram
+              </a>
             </div>
           </div>
         </div>
