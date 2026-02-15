@@ -55,7 +55,7 @@ export const checkoutInputSchema = z.object({
   customer: z.object({
     name: z.string().min(2),
     email: z.string().email(),
-    phone: z.string().min(8).optional(),
+    phone: z.string().min(8),
   }),
   address: z.object({
     postalCode: z.string().min(8).transform((v) => v.replace(/\D/g, "")),

@@ -206,6 +206,7 @@ export default function Index() {
       if (!selectedSize) throw new Error("Selecione um tamanho");
       if (!checkoutForm.name.trim()) throw new Error("Informe seu nome");
       if (!checkoutForm.email.trim()) throw new Error("Informe seu e-mail");
+      if (!checkoutForm.phone.trim()) throw new Error("Informe seu WhatsApp");
       const cep = checkoutForm.postalCode.replace(/\D/g, "");
       if (cep.length !== 8) throw new Error("Informe um CEP válido");
       if (!checkoutForm.street.trim()) throw new Error("Informe a rua");
@@ -659,7 +660,7 @@ export default function Index() {
                     inputMode="email"
                   />
                   <FloatingInput
-                    label="WhatsApp (opcional)"
+                    label="WhatsApp"
                     placeholder="(44) 99976-0479"
                     value={checkoutForm.phone}
                     onChange={(e) => setCheckoutForm((s) => ({ ...s, phone: e.target.value }))}
