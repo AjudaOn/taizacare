@@ -69,8 +69,6 @@ export async function createMercadoPagoPreference(params: {
               { id: "credit_card" },
               { id: "debit_card" },
               { id: "ticket" },
-              { id: "atm" },
-              { id: "prepaid_card" },
             ],
           }
         : {
