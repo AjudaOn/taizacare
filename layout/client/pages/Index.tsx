@@ -573,49 +573,53 @@ export default function Index() {
                     </p>
                     <div className="grid grid-cols-1 gap-2">
                       <label
-                        className={`flex cursor-pointer items-center justify-between rounded-xl border px-4 py-3 text-sm transition ${
+                        className={`cursor-pointer rounded-xl border px-4 py-3 text-sm transition ${
                           paymentMethod === "pix"
                             ? "border-[#3a3a3a] bg-white"
                             : "border-[#d2c9be]/30 bg-white/60 hover:bg-white"
                         }`}
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-start gap-3">
                           <input
                             type="radio"
                             name="pay"
                             checked={paymentMethod === "pix"}
                             onChange={() => setPaymentMethod("pix")}
+                            className="mt-1"
                           />
-                          <div className="leading-tight">
-                            <div className="font-medium text-[#3a3a3a]">PIX (com desconto)</div>
+                          <div className="min-w-0 flex-1 leading-tight">
+                            <div className="font-medium text-[#3a3a3a]">PIX</div>
+                            <div className="text-xs text-[#6c6c6c]">(com desconto)</div>
+                            <div className="mt-2 font-medium text-[#3a3a3a] whitespace-nowrap tabular-nums">
+                              {formatBRL(productPixPriceCents)}
+                            </div>
                             <div className="text-xs text-[#6c6c6c]">Pagamento instantâneo</div>
                           </div>
                         </div>
-                        <div className="font-medium text-[#3a3a3a] shrink-0 whitespace-nowrap tabular-nums">
-                          {formatBRL(productPixPriceCents)}
-                        </div>
                       </label>
                       <label
-                        className={`flex cursor-pointer items-center justify-between rounded-xl border px-4 py-3 text-sm transition ${
+                        className={`cursor-pointer rounded-xl border px-4 py-3 text-sm transition ${
                           paymentMethod === "card"
                             ? "border-[#3a3a3a] bg-white"
                             : "border-[#d2c9be]/30 bg-white/60 hover:bg-white"
                         }`}
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-start gap-3">
                           <input
                             type="radio"
                             name="pay"
                             checked={paymentMethod === "card"}
                             onChange={() => setPaymentMethod("card")}
+                            className="mt-1"
                           />
-                          <div className="leading-tight">
+                          <div className="min-w-0 flex-1 leading-tight">
                             <div className="font-medium text-[#3a3a3a]">Cartão</div>
-                            <div className="text-xs text-[#6c6c6c]">Em até 3x</div>
+                            <div className="text-xs text-[#6c6c6c]">(em até 3x)</div>
+                            <div className="mt-2 font-medium text-[#3a3a3a] whitespace-nowrap tabular-nums">
+                              {formatBRL(productCardPriceCents)}
+                            </div>
+                            <div className="text-xs text-[#6c6c6c]">Parcelamento no cartão</div>
                           </div>
-                        </div>
-                        <div className="font-medium text-[#3a3a3a] shrink-0 whitespace-nowrap tabular-nums">
-                          {formatBRL(productCardPriceCents)}
                         </div>
                       </label>
                     </div>
