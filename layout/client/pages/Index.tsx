@@ -517,7 +517,7 @@ export default function Index() {
                     para o pós parto!
                   </p>
                   <div className="grid grid-cols-2 gap-4">
-                    {["PP (34-36)", "P (36-38)", "M (40-42)", "G (44-46)", "GG (48-50)"].map((size) => (
+                    {["P (36-38)", "M (40-42)", "G (44-46)", "GG (48-50)"].map((size) => (
                       <button 
                         key={size}
                         onClick={() => setSelectedSize(size)}
