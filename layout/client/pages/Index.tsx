@@ -891,20 +891,16 @@ export default function Index() {
               <FooterColumn title="Suporte" links={["Trocas", "Privacidade", "Contato"]} />
             </div>
           </div>
-          <div className="mt-24 pt-8 border-t border-[#d2c9be]/10 flex flex-col md:flex-row justify-between gap-6">
-            <span className="text-[10px] uppercase tracking-widest text-[#b3b2b2]">
-              © {new Date().getFullYear()} Taiza Care.
-            </span>
-            <div className="flex gap-6 text-[10px] uppercase tracking-widest font-bold text-[#3a3a3a]">
-              <a
-                href="https://www.instagram.com/taizapelvica?igsh=djJuaDkxd3lldmk3"
-                target="_blank"
-                rel="noreferrer"
-                className="hover:text-[#afa498] transition-colors"
-              >
-                Instagram
-              </a>
-            </div>
+          <div className="mt-24 pt-8 border-t border-[#d2c9be]/10 flex items-center justify-center gap-6 text-[10px] uppercase tracking-widest text-[#b3b2b2]">
+            <span>© {new Date().getFullYear()} Taiza Care!</span>
+            <a
+              href="https://www.instagram.com/taizapelvica?igsh=djJuaDkxd3lldmk3"
+              target="_blank"
+              rel="noreferrer"
+              className="font-bold text-[#3a3a3a] hover:text-[#afa498] transition-colors"
+            >
+              Instagram
+            </a>
           </div>
           <div className="mt-6 text-center text-[10px] uppercase tracking-widest text-[#b3b2b2]">
             Desenvolvido por{" "}
