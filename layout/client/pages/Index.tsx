@@ -310,7 +310,7 @@ export default function Index() {
                 <span className="italic font-light text-[#afa498]">Redefinido.</span>
               </h1>
               <p className="text-lg md:text-xl text-[#6c6c6c] mb-12 max-w-lg leading-relaxed font-light">
-                A primeira calcinha pós-parto que une ciência pélvica a uma estética premium. Desenvolvida para apoiar sua recuperação com elegância.
+                Uma calcinha que une a ciência da fisioterapia pélvica a uma estética premium. Desenvolvida para oferecer conforto e segurança na recuperação pós-parto.
               </p>
               <div className="flex flex-col sm:flex-row gap-6">
                 <Button 
@@ -383,7 +383,7 @@ export default function Index() {
                 o novo corpo.
               </h2>
               <p className="text-[#6c6c6c] font-light leading-relaxed mb-12">
-                O pós-parto exige cuidado, mas não pede para você abrir mão de quem você é. Combinamos fisiologia com design minimalista.
+                O pós-parto exige cuidado, mas não exige que você abra mão de quem você é. Combinamos fisiologia com design minimalista e conforto.
               </p>
             </div>
             
@@ -391,23 +391,82 @@ export default function Index() {
               <FeatureItem 
                 icon={<Maximize className="w-10 h-10" />}
                 title="Sustentação Muscular"
-                desc="Auxilia na retração abdominal de forma fisiológica, sem sufocar."
+                desc="Proporciona suporte muscular adequado, sem compressão excessiva, permitindo que os músculos abdominais continuem ativos, respeitando o processo de recuperação natural do corpo."
               />
               <FeatureItem 
                 icon={<Sparkles className="w-10 h-10" />}
                 title="Drenagem Suave"
-                desc="A compressão graduada ajuda a reduzir o inchaço dos primeiros dias."
+                desc="Com nível de compressão médio, ajuda a reduzir o inchaço dos primeiros dias."
               />
               <FeatureItem 
                 icon={<Heart className="w-10 h-10" />}
                 title="Cuidado Cicatricial"
-                desc="Toque de seda nas áreas sensíveis, essencial para recuperação de cesáreas."
+                desc="Com toque suave nas áreas sensíveis, compressão uniforme do púbis até a cintura e sem costuras, evita acumulo de líquido acima ou abaixo da cicatriz, reduzindo o risco de complicações funcionais e estéticas. A calcinha essencial para a recuperação após cesárea!"
               />
               <FeatureItem 
                 icon={<Wind className="w-10 h-10" />}
                 title="Respirabilidade"
                 desc="Tecido premium que mantém a temperatura ideal e a pele seca."
               />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pregnancy Use - Comfort in Every Phase */}
+      <section className="py-32 bg-white">
+        <div className="container px-6 mx-auto">
+          <div className="max-w-5xl mx-auto">
+            <div className="rounded-[4rem] bg-[#F9F7F5] border border-[#d2c9be]/20 p-12 lg:p-20 shadow-[0_48px_80px_-16px_rgba(175,164,152,0.10)]">
+              <Badge className="bg-[#afa498]/10 text-[#afa498] hover:bg-[#afa498]/10 border-none px-4 py-1 mb-6">
+                Gestação
+              </Badge>
+              <h2 className="font-aserha text-4xl lg:text-5xl text-[#3a3a3a] leading-[1.1] mb-8">
+                Você não precisa esperar o pós-parto para sentir esse cuidado
+              </h2>
+              <p className="text-lg text-[#6c6c6c] font-light leading-relaxed mb-8">
+                A calcinha Taiza Care já pode ser usada durante a gestação. O tecido tecnológico se adapta ao crescimento
+                da barriga sem apertar, sem marcar e sem incomodar.
+              </p>
+              <p className="text-[#6c6c6c] font-light leading-relaxed mb-8">
+                Ela acompanha as mudanças do seu corpo mês a mês, oferecendo:
+              </p>
+
+              <ul className="space-y-4 mb-10">
+                {[
+                  "Sustentação suave para o abdome",
+                  "Mais sensação de segurança ao caminhar",
+                  "Conforto para a lombar e pelve no dia a dia",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-[#3a3a3a]">
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#afa498]" />
+                    <span className="text-base font-light leading-relaxed text-[#6c6c6c]">{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Separator className="bg-[#d2c9be]/30" />
+
+              <p className="mt-10 text-lg text-[#6c6c6c] font-light leading-relaxed">
+                É cuidado agora.
+                <br />
+                É suporte durante.
+                <br />
+                E continua sendo essencial no pós-parto.
+              </p>
+              <p className="mt-8 text-lg text-[#6c6c6c] font-light leading-relaxed">
+                Porque você merece conforto em todas as fases da maternidade!
+              </p>
+
+              <div className="mt-12">
+                <Button
+                  onClick={scrollToCheckout}
+                  className="h-14 rounded-full bg-[#3a3a3a] px-8 text-white hover:bg-black transition-all"
+                >
+                  Quero esse conforto
+                  <ChevronRight className="ml-2 h-5 w-5 opacity-80" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -431,11 +490,38 @@ export default function Index() {
                 "A calcinha ideal não apenas aperta; ela acolhe e orienta o corpo de volta ao lugar."
               </h2>
               <p className="text-lg text-[#6c6c6c] font-light leading-relaxed mb-10">
-                Como fisioterapeuta pélvica, vejo o impacto de uma recuperação segura. A Taiza Care foi desenhada para respeitar cada fase do seu corpo.
+                Como fisioterapeuta pélvica, vejo o impacto de uma recuperação segura e orientada. A calcinha pós-parto Taiza Care foi desenhada para acelerar o processo de recuperação de forma respeitosa e confortável.
               </p>
               <div className="flex items-center gap-4">
                 <div className="h-px w-8 bg-[#afa498]" />
-                <span className="font-aserha text-xl text-[#3a3a3a]">Dra. Taiza F., Fisioterapeuta</span>
+                <span className="font-aserha text-xl text-[#3a3a3a]">Dra. Izabela R. Camilo, Fisioterapeuta</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 flex flex-col lg:flex-row bg-white rounded-[4rem] overflow-hidden shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/20">
+            <div className="lg:w-1/2 relative min-h-[400px]">
+              <img
+                src="/calcinha2.jpeg"
+                className="absolute inset-0 w-full h-full object-cover"
+                alt="Especialista"
+              />
+              <div className="absolute inset-0 bg-black/10" />
+            </div>
+            <div className="lg:w-1/2 p-12 lg:p-24 flex flex-col justify-center">
+              <span className="text-xs uppercase tracking-[0.3em] text-[#afa498] font-bold mb-6">Expertise Pélvica</span>
+              <h2 className="font-aserha text-4xl text-[#3a3a3a] mb-8 leading-[1.1]">
+                "Uma escolha errada nessa fase pode comprometer a recuperação e trazer prejuízos para o resto da vida."
+              </h2>
+              <p className="text-lg text-[#6c6c6c] font-light leading-relaxed mb-10">
+                Recebo diversas pacientes com queixas relacionadas a cicatrização pós-parto. Muitas vezes é devido ao uso
+                de calcinhas e cintas inadequadas, que possuem tecidos diferentes, compressões irregulares, costuras
+                sobre a cicatriz ou compressão excessiva, que resultam em resultados estéticos e funcionais
+                desfavoráveis.
+              </p>
+              <div className="flex items-center gap-4">
+                <div className="h-px w-8 bg-[#afa498]" />
+                <span className="font-aserha text-xl text-[#3a3a3a]">Dra. Tainara B. da Mata, Fisioterapeuta</span>
               </div>
             </div>
           </div>
@@ -452,12 +538,12 @@ export default function Index() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             {[
-              "Compressão Graduada",
-              "Tecido Hipoalergênico",
+              "Compressão média ideal",
+              "Tecido tecnológico e respirável",
               "Acabamento Invisível",
-              "Modelagem 3D",
-              "Cós Alto Estabilizador",
-              "Não Enrola"
+              "Variedade de tamanhos",
+              "Estabilização com conforto",
+              "Desenvolvida por especialistas"
             ].map((item, i) => (
               <motion.div 
                 whileHover={{ y: -5 }}
@@ -482,12 +568,12 @@ export default function Index() {
             <div className="relative text-center">
               <span className="absolute -top-12 left-1/2 -translate-x-1/2 text-[12rem] font-aserha text-[#afa498]/5 -z-10 leading-none">“</span>
               <p className="font-aserha text-3xl md:text-4xl text-[#3a3a3a] leading-tight mb-12 italic px-8">
-                Superou minhas expectativas. Me senti segura para carregar minha filha sem aquela sensação de 'tudo solto' na barriga. É realmente invisível sob a roupa.
+                Superou minhas expectativas. Me senti segura para cuidar da minha filha sem aquela sensação de 'tudo solto' na barriga. Uma compressão confortável, sem me sentir sufocada.
               </p>
               <div className="flex flex-col items-center">
                 <div className="w-16 h-16 rounded-full bg-[#d2c9be] mb-4 shadow-inner" />
-                <span className="font-bold text-[#3a3a3a]">Vanessa Oliveira</span>
-                <span className="text-sm text-[#afa498]">Mãe da Alice</span>
+                <span className="font-bold text-[#3a3a3a]">Laylla Legnani</span>
+                <span className="text-sm text-[#afa498]">Mãe da Lorena</span>
               </div>
             </div>
           </div>
@@ -504,20 +590,24 @@ export default function Index() {
                 <div>
                   <h2 className="font-aserha text-5xl text-[#3a3a3a] mb-8">Comece sua <br /> Recuperação.</h2>
                   <p className="text-lg text-[#6c6c6c] font-light leading-relaxed">
-                    Escolha o tamanho que melhor se adapta a você hoje. Em caso de dúvida, nossa modelagem é adaptável.
+                    Escolha o tamanho que melhor se adapta a você. Em caso de dúvida, siga as instruções abaixo:
                   </p>
                 </div>
                 
                 <div className="space-y-6">
                   <h3 className="text-sm uppercase tracking-widest font-bold text-[#3a3a3a]">1. Tamanho</h3>
                   <p className="text-sm text-[#6c6c6c] font-light leading-relaxed">
-                    <span className="font-medium text-[#3a3a3a]">Como escolher o seu:</span> Se baseie no tamanho de
-                    calcinha que utilizava antes da gestação, pois nossos modelos já são desenvolvidos pensando no ganho
-                    de peso gestacional. Por exemplo: se usava tamanho M antes da gestação, peça a calcinha de tamanho M
-                    para o pós parto!
+                    <span className="font-medium text-[#3a3a3a]">Para o pós-parto:</span> Se baseie no tamanho de calcinha
+                    que utilizava antes da gestação, pois nossos modelos já são desenvolvidos pensando no ganho de peso
+                    gestacional. Por exemplo: se usava tamanho M antes da gestação, peça a calcinha de tamanho M para o
+                    pós-parto!
+                    <br />
+                    <br />
+                    <span className="font-medium text-[#3a3a3a]">Para a gestação:</span> Invista em um tamanho maior do que
+                    utilizava antes da gestação, para garantir maior conforto conforme houver aumento do abdome!
                   </p>
                   <div className="grid grid-cols-2 gap-4">
-                    {["P (36-38)", "M (40-42)", "G (44-46)", "GG (48-50)"].map((size) => (
+                    {["PP (34-36)", "P (36-38)", "M (40-42)", "G (44-46)", "GG (48-50)"].map((size) => (
                       <button 
                         key={size}
                         onClick={() => setSelectedSize(size)}
