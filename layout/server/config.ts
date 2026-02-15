@@ -21,6 +21,10 @@ export const env = {
   mpAccessToken: envString("MP_ACCESS_TOKEN", ""),
   mpWebhookSecret: envString("MP_WEBHOOK_SECRET", ""),
 
+  // Dispatch automation (n8n, etc.)
+  n8nPaidWebhookUrl: envString("N8N_PAID_WEBHOOK_URL", ""),
+  n8nPaidWebhookSecret: envString("N8N_PAID_WEBHOOK_SECRET", ""),
+
   // Admin
   adminToken: envString("ADMIN_TOKEN", ""),
 
