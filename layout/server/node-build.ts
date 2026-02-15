@@ -1,13 +1,19 @@
 import path from "path";
-import { createServer } from "./index";
 import * as express from "express";
 import { fileURLToPath } from "url";
+import dotenv from "dotenv";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Load runtime env vars (Mercado Pago, Melhor Envio, PUBLIC_BASE_URL, etc.)
+// In production we run `node dist/server/node-build.mjs`, so `.env` lives at `../../.env`.
+dotenv.config({ path: path.join(__dirname, "../../.env") });
+
+const { createServer } = await import("./index");
 const app = createServer();
 const port = process.env.PORT || 3000;
 
 // In production, serve the built SPA files
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distPath = path.join(__dirname, "../spa");
 
 // Serve static files
