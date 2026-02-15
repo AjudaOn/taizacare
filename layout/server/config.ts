@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+function envString(name: string, fallback: string) {
+  const value = process.env[name];
+  if (value == null) return fallback;
+  const trimmed = value.trim();
+  return trimmed === "" ? fallback : trimmed;
+}
+
 function envNumber(name: string, fallback: number) {
   const value = process.env[name];
   if (value == null || value.trim() === "") return fallback;
@@ -8,10 +15,10 @@ function envNumber(name: string, fallback: number) {
 }
 
 export const env = {
-  publicBaseUrl: process.env.PUBLIC_BASE_URL ?? "http://localhost:8080",
+  publicBaseUrl: envString("PUBLIC_BASE_URL", "http://localhost:8080").replace(/\/+$/, ""),
 
   // Mercado Pago
-  mpAccessToken: process.env.MP_ACCESS_TOKEN ?? "",
+  mpAccessToken: envString("MP_ACCESS_TOKEN", ""),
 
   // Melhor Envio
   meBaseUrl: process.env.ME_BASE_URL ?? "https://melhorenvio.com.br",

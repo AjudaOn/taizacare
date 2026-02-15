@@ -16,7 +16,22 @@ export async function createMercadoPagoPreference(params: {
     };
   }
 
+  let publicBaseUrl: URL;
+  try {
+    publicBaseUrl = new URL(env.publicBaseUrl);
+  } catch {
+    throw new Error(
+      `PUBLIC_BASE_URL inválida (${JSON.stringify(env.publicBaseUrl)}). Defina uma URL completa, ex: https://taizacare.ajudaon.com.br`,
+    );
+  }
+  if (publicBaseUrl.protocol !== "http:" && publicBaseUrl.protocol !== "https:") {
+    throw new Error(
+      `PUBLIC_BASE_URL inválida (${JSON.stringify(env.publicBaseUrl)}). Use http:// ou https://`,
+    );
+  }
+
   const url = "https://api.mercadopago.com/checkout/preferences";
+  const baseUrl = publicBaseUrl.toString().replace(/\/+$/, "");
   const preferenceBody = {
     items: [
       {
@@ -55,9 +70,9 @@ export async function createMercadoPagoPreference(params: {
           },
     external_reference: params.orderId,
     back_urls: {
-      success: `${env.publicBaseUrl}/?status=success&orderId=${params.orderId}`,
-      failure: `${env.publicBaseUrl}/?status=failure&orderId=${params.orderId}`,
-      pending: `${env.publicBaseUrl}/?status=pending&orderId=${params.orderId}`,
+      success: `${baseUrl}/?status=success&orderId=${params.orderId}`,
+      failure: `${baseUrl}/?status=failure&orderId=${params.orderId}`,
+      pending: `${baseUrl}/?status=pending&orderId=${params.orderId}`,
     },
     auto_return: "approved",
   };
