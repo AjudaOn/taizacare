@@ -545,11 +545,13 @@ export default function Index() {
                   <div className="mt-3 space-y-1 text-xs text-[#6c6c6c]">
                     <div className="flex items-center justify-between">
                       <span>Produto</span>
-                      <span className="font-medium text-[#3a3a3a]">{formatBRL(productLineCents)}</span>
+                      <span className="font-medium text-[#3a3a3a] whitespace-nowrap tabular-nums">
+                        {formatBRL(productLineCents)}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span>Frete</span>
-                      <span className="font-medium text-[#3a3a3a]">
+                      <span className="font-medium text-[#3a3a3a] whitespace-nowrap tabular-nums">
                         {shippingLoading ? "Calculando..." : shippingPriceCents ? formatBRL(shippingPriceCents) : "—"}
                       </span>
                     </div>
@@ -589,7 +591,9 @@ export default function Index() {
                             <div className="text-xs text-[#6c6c6c]">Pagamento instantâneo</div>
                           </div>
                         </div>
-                        <div className="font-medium text-[#3a3a3a]">{formatBRL(productPixPriceCents)}</div>
+                        <div className="font-medium text-[#3a3a3a] shrink-0 whitespace-nowrap tabular-nums">
+                          {formatBRL(productPixPriceCents)}
+                        </div>
                       </label>
                       <label
                         className={`flex cursor-pointer items-center justify-between rounded-xl border px-4 py-3 text-sm transition ${
@@ -610,7 +614,9 @@ export default function Index() {
                             <div className="text-xs text-[#6c6c6c]">Em até 3x</div>
                           </div>
                         </div>
-                        <div className="font-medium text-[#3a3a3a]">{formatBRL(productCardPriceCents)}</div>
+                        <div className="font-medium text-[#3a3a3a] shrink-0 whitespace-nowrap tabular-nums">
+                          {formatBRL(productCardPriceCents)}
+                        </div>
                       </label>
                     </div>
                   </div>
