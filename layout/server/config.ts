@@ -19,6 +19,7 @@ export const env = {
 
   // Mercado Pago
   mpAccessToken: envString("MP_ACCESS_TOKEN", ""),
+  mpWebhookSecret: envString("MP_WEBHOOK_SECRET", ""),
 
   // Melhor Envio
   meBaseUrl: process.env.ME_BASE_URL ?? "https://melhorenvio.com.br",
