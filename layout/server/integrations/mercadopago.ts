@@ -41,21 +41,17 @@ export async function createMercadoPagoPreference(params: {
 
   const url = "https://api.mercadopago.com/checkout/preferences";
   const baseUrl = publicBaseUrl.toString().replace(/\/+$/, "");
+  const totalCents = params.product.quantity * params.product.unitPriceCents + params.shipping.unitPriceCents;
+  const itemTitle = `${params.product.title} (${params.product.quantity}x) + ${params.shipping.title}`;
   const preferenceBody = {
+    // Use a single item with total (product + shipping) to avoid checkout edge-cases.
     items: [
       {
         id: env.productSku,
-        title: params.product.title,
-        quantity: params.product.quantity,
-        currency_id: "BRL",
-        unit_price: params.product.unitPriceCents / 100,
-      },
-      {
-        id: "shipping",
-        title: params.shipping.title,
+        title: itemTitle,
         quantity: 1,
         currency_id: "BRL",
-        unit_price: params.shipping.unitPriceCents / 100,
+        unit_price: totalCents / 100,
       },
     ],
     payer: {
@@ -64,7 +60,6 @@ export async function createMercadoPagoPreference(params: {
     payment_methods:
       params.paymentMethod === "pix"
         ? {
-            default_payment_method_id: "pix",
             excluded_payment_types: [
               { id: "credit_card" },
               { id: "debit_card" },
