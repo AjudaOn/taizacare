@@ -29,6 +29,15 @@ export async function createMercadoPagoPreference(params: {
       `PUBLIC_BASE_URL inválida (${JSON.stringify(env.publicBaseUrl)}). Use http:// ou https://`,
     );
   }
+  const isLocalhost =
+    publicBaseUrl.hostname === "localhost" ||
+    publicBaseUrl.hostname === "127.0.0.1" ||
+    publicBaseUrl.hostname === "[::1]";
+  if (!isLocalhost && publicBaseUrl.protocol === "http:") {
+    throw new Error(
+      `Em produção, PUBLIC_BASE_URL precisa ser HTTPS (ex: https://taizacare.ajudaon.com.br). Valor atual: ${JSON.stringify(env.publicBaseUrl)}`,
+    );
+  }
 
   const url = "https://api.mercadopago.com/checkout/preferences";
   const baseUrl = publicBaseUrl.toString().replace(/\/+$/, "");
@@ -74,7 +83,7 @@ export async function createMercadoPagoPreference(params: {
       failure: `${baseUrl}/?status=failure&orderId=${params.orderId}`,
       pending: `${baseUrl}/?status=pending&orderId=${params.orderId}`,
     },
-    auto_return: "approved",
+    ...(publicBaseUrl.protocol === "https:" ? { auto_return: "approved" as const } : {}),
   };
 
   const res = await fetch(url, {
