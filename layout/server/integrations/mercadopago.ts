@@ -64,7 +64,7 @@ export async function createMercadoPagoPreference(params: {
     payment_methods:
       params.paymentMethod === "pix"
         ? {
-            installments: 1,
+            default_payment_method_id: "pix",
             excluded_payment_types: [
               { id: "credit_card" },
               { id: "debit_card" },
