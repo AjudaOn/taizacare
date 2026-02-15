@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
   ShieldCheck, 
   Wind, 
@@ -99,7 +99,6 @@ const SuccessState = ({ onBack }: { onBack: () => void }) => (
 export default function Index() {
   const checkoutRef = useRef<HTMLDivElement>(null);
   const [isPurchased, setIsPurchased] = useState(false);
-  const [showFixedButton, setShowFixedButton] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [checkoutForm, setCheckoutForm] = useState({
@@ -123,14 +122,6 @@ export default function Index() {
       "Olá! Vim pelo site da Taiza Care e queria tirar uma dúvida sobre a Calcinha Pós-Parto.",
     );
     return `https://wa.me/${phone}?text=${text}`;
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowFixedButton(window.scrollY > 600);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToCheckout = () => {
@@ -765,33 +756,11 @@ export default function Index() {
         href={whatsappHref}
         target="_blank"
         rel="noreferrer"
-        className={`fixed right-5 z-[70] flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl shadow-black/20 hover:bg-[#1fb85a] transition-colors md:hidden ${
-          showFixedButton ? "bottom-28" : "bottom-6"
-        }`}
+        className="fixed bottom-6 right-5 z-[70] flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xl shadow-black/20 hover:bg-[#1fb85a] transition-colors md:hidden"
         aria-label="Falar no WhatsApp"
       >
         <MessageCircle className="h-6 w-6" />
       </a>
-
-      {/* Mobile Sticky Button - Sophisticated Blur */}
-      <AnimatePresence>
-        {showFixedButton && !isPurchased && (
-          <motion.div 
-            key="mobile-cta"
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            className="fixed bottom-8 left-6 right-6 z-[60] lg:hidden"
-          >
-            <Button 
-              onClick={scrollToCheckout}
-              className="w-full h-18 bg-[#3a3a3a]/90 backdrop-blur-md text-white py-8 rounded-[2rem] text-lg font-light shadow-2xl shadow-black/20 flex items-center justify-center gap-2 border border-white/10"
-            >
-              Comprar Agora <ArrowRight className="w-5 h-5" />
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
