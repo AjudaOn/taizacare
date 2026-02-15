@@ -864,7 +864,7 @@ export default function Index() {
       </section>
 
       {/* Modern Footer */}
-      <footer className="py-24 bg-white border-t border-[#d2c9be]/20">
+      <footer className="pt-12 pb-24 bg-white border-t border-[#d2c9be]/20">
         <div className="container px-6 mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start gap-16 md:gap-0">
             <div>
