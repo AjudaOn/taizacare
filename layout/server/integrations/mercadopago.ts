@@ -88,7 +88,12 @@ export async function createMercadoPagoPreference(params: {
 
   const json = (await res.json().catch(() => null)) as any;
   if (!res.ok) {
-    throw new Error(json?.message || json?.error || "Erro ao criar preferência no Mercado Pago");
+    const mpMessage = json?.message || json?.error || "Erro ao criar preferência no Mercado Pago";
+    throw new Error(
+      `${mpMessage} | publicBaseUrl=${env.publicBaseUrl} | back_urls=${JSON.stringify(
+        preferenceBody.back_urls,
+      )}`,
+    );
   }
 
   const initPoint = json?.init_point || json?.sandbox_init_point;
