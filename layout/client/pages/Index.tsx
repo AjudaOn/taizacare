@@ -292,7 +292,7 @@ export default function Index() {
       </nav>
 
       {/* Hero Section - Asymmetrical & Modern */}
-      <header className="relative min-h-[90vh] flex items-center pt-24">
+      <header className="relative min-h-[90vh] flex items-center pt-28">
         <div className="container px-6 mx-auto flex flex-col lg:flex-row items-center gap-16 lg:gap-0">
           <div className="w-full lg:w-1/2 relative z-10 lg:pr-12">
             <motion.div
