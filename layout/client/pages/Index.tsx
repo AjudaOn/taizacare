@@ -892,8 +892,18 @@ export default function Index() {
             </div>
           </div>
           <div className="mt-24 pt-8 border-t border-[#d2c9be]/10 flex flex-col md:flex-row justify-between gap-6">
-            <span className="text-[10px] uppercase tracking-widest text-[#b3b2b2]">© 2026 Taiza Care. Premium Recovery Wear.</span>
+            <span className="text-[10px] uppercase tracking-widest text-[#b3b2b2]">
+              © {new Date().getFullYear()} Taiza Care. Premium Recovery Wear.
+            </span>
             <div className="flex gap-6 text-[10px] uppercase tracking-widest font-bold text-[#3a3a3a]">
+              <a
+                href="https://ajudaon.com.br"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[#afa498] hover:text-[#3a3a3a] transition-colors"
+              >
+                Webdeveloper: AjudaOn
+              </a>
               <span>Instagram</span>
               <span>Pinterest</span>
             </div>
