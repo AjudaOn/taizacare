@@ -500,8 +500,12 @@ export default function Index() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="mt-12 flex flex-col lg:flex-row bg-white rounded-[4rem] overflow-hidden shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/20">
+      <section className="py-32 bg-[#F9F7F5]">
+        <div className="container px-6 mx-auto">
+          <div className="flex flex-col lg:flex-row bg-white rounded-[4rem] overflow-hidden shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/20">
             <div className="lg:w-1/2 relative min-h-[400px]">
               <img
                 src="/calcinha2.jpeg"
@@ -531,7 +535,7 @@ export default function Index() {
       </section>
 
       {/* Modern Product Details */}
-      <section className="py-32 bg-[#F9F7F5]">
+      <section className="py-32 bg-white">
         <div className="container px-6 mx-auto">
           <div className="text-center mb-24">
             <h2 className="font-aserha text-4xl lg:text-5xl text-[#3a3a3a] mb-6">Detalhes que Fazem a Diferença</h2>
@@ -561,7 +565,7 @@ export default function Index() {
       </section>
 
       {/* Testimonials - Elegant & Minimal */}
-      <section className="py-32 bg-white relative overflow-hidden">
+      <section className="py-32 bg-[#F9F7F5] relative overflow-hidden">
         <div className="container px-6 mx-auto relative z-10">
           <div className="max-w-4xl mx-auto">
             <div className="flex justify-center mb-12">
@@ -584,7 +588,7 @@ export default function Index() {
       </section>
 
       {/* Modern Checkout Section */}
-      <section ref={checkoutRef} className="py-32 bg-[#F9F7F5] scroll-mt-20">
+      <section ref={checkoutRef} className="py-32 bg-white scroll-mt-20">
         <div className="container px-6 mx-auto">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-24">
