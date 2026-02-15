@@ -5,6 +5,7 @@ import { handleDemo } from "./routes/demo";
 import { handleShippingQuote } from "./routes/shipping-quote";
 import { handleCheckout } from "./routes/checkout";
 import { handleMercadoPagoWebhook } from "./routes/mp-webhook";
+import { handleAdminOrders } from "./routes/admin-orders";
 
 export function createServer() {
   const app = express();
@@ -26,6 +27,7 @@ export function createServer() {
   app.post("/api/shipping/quote", handleShippingQuote);
   app.post("/api/checkout", handleCheckout);
   app.post("/api/mp/webhook", handleMercadoPagoWebhook);
+  app.get("/api/admin/orders", handleAdminOrders);
 
   return app;
 }

@@ -137,6 +137,18 @@ export function getOrderById(orderId: string): OrderRow | undefined {
   return stmt.get(orderId) as OrderRow | undefined;
 }
 
+export function listOrders(params?: { status?: OrderStatus; limit?: number }) {
+  const db = getDb();
+  const limit = Math.min(Math.max(params?.limit ?? 100, 1), 500);
+  const status = params?.status;
+  if (status) {
+    const stmt = db.prepare(`SELECT * FROM orders WHERE status = ? ORDER BY created_at DESC LIMIT ?`);
+    return stmt.all(status, limit) as OrderRow[];
+  }
+  const stmt = db.prepare(`SELECT * FROM orders ORDER BY created_at DESC LIMIT ?`);
+  return stmt.all(limit) as OrderRow[];
+}
+
 export function markOrderPaid(params: {
   orderId: string;
   mpPaymentId: string;

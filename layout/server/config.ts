@@ -21,6 +21,9 @@ export const env = {
   mpAccessToken: envString("MP_ACCESS_TOKEN", ""),
   mpWebhookSecret: envString("MP_WEBHOOK_SECRET", ""),
 
+  // Admin
+  adminToken: envString("ADMIN_TOKEN", ""),
+
   // Melhor Envio
   meBaseUrl: process.env.ME_BASE_URL ?? "https://melhorenvio.com.br",
   meToken: process.env.ME_TOKEN ?? "",
