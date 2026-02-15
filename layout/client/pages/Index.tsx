@@ -413,7 +413,7 @@ export default function Index() {
       </section>
 
       {/* Pregnancy Use - Comfort in Every Phase */}
-      <section className="py-32 bg-[#F9F7F5]">
+      <section className="py-32 bg-[#f1eeeb]">
         <div className="container px-6 mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             <div className="lg:col-span-5">
@@ -503,7 +503,7 @@ export default function Index() {
         </div>
       </section>
 
-      <section className="py-32 bg-[#F9F7F5]">
+      <section className="py-32 bg-[#f1eeeb]">
         <div className="container px-6 mx-auto">
           <div className="flex flex-col lg:flex-row bg-white rounded-[4rem] overflow-hidden shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/20">
             <div className="lg:w-1/2 relative min-h-[400px]">
@@ -565,7 +565,7 @@ export default function Index() {
       </section>
 
       {/* Testimonials - Elegant & Minimal */}
-      <section className="py-32 bg-[#F9F7F5] relative overflow-hidden">
+      <section className="py-32 bg-[#f1eeeb] relative overflow-hidden">
         <div className="container px-6 mx-auto relative z-10">
           <div className="max-w-4xl mx-auto">
             <div className="flex justify-center mb-12">
