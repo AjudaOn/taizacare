@@ -327,7 +327,7 @@ export default function Index() {
               {/* Main Image with sophisticated border radius */}
               <div className="w-full h-full rounded-[4rem] rounded-tr-[12rem] overflow-hidden shadow-[0_64px_96px_-24px_rgba(175,164,152,0.3)]">
                 <img 
-                  src="https://images.pexels.com/photos/7795397/pexels-photo-7795397.jpeg" 
+                  src="/calcinha1.jpeg"
                   alt="Product Aesthetic"
                   className="w-full h-full object-cover scale-105"
                 />
@@ -404,7 +404,7 @@ export default function Index() {
           <div className="flex flex-col lg:flex-row bg-white rounded-[4rem] overflow-hidden shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/20">
             <div className="lg:w-1/2 relative min-h-[400px]">
               <img 
-                src="https://images.pexels.com/photos/20860586/pexels-photo-20860586.jpeg" 
+                src="/calcinha2.jpeg"
                 className="absolute inset-0 w-full h-full object-cover"
                 alt="Especialista"
               />
@@ -495,6 +495,12 @@ export default function Index() {
                 
                 <div className="space-y-6">
                   <h3 className="text-sm uppercase tracking-widest font-bold text-[#3a3a3a]">1. Tamanho</h3>
+                  <p className="text-sm text-[#6c6c6c] font-light leading-relaxed">
+                    <span className="font-medium text-[#3a3a3a]">Como escolher o seu:</span> Se baseie no tamanho de
+                    calcinha que utilizava antes da gestação, pois nossos modelos já são desenvolvidos pensando no ganho
+                    de peso gestacional. Por exemplo: se usava tamanho M antes da gestação, peça a calcinha de tamanho M
+                    para o pós parto!
+                  </p>
                   <div className="grid grid-cols-2 gap-4">
                     {["PP (34-36)", "P (36-38)", "M (40-42)", "G (44-46)", "GG (48-50)"].map((size) => (
                       <button 
