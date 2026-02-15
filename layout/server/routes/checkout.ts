@@ -64,6 +64,9 @@ export const handleCheckout: RequestHandler = async (req, res) => {
       total_cents: totalCents,
       mp_preference_id: null,
       mp_init_point: null,
+      mp_payment_id: null,
+      mp_payment_status: null,
+      paid_at: null,
     });
 
     const mp = await createMercadoPagoPreference({

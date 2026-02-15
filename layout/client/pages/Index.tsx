@@ -106,6 +106,11 @@ export default function Index() {
     email: "",
     phone: "",
     postalCode: "",
+    street: "",
+    number: "",
+    complement: "",
+    city: "",
+    state: "",
   });
   const [shippingOptions, setShippingOptions] = useState<
     Array<{ serviceId: string | number; name: string; priceCents: number; deliveryTime?: number | null }>
@@ -203,6 +208,10 @@ export default function Index() {
       if (!checkoutForm.email.trim()) throw new Error("Informe seu e-mail");
       const cep = checkoutForm.postalCode.replace(/\D/g, "");
       if (cep.length !== 8) throw new Error("Informe um CEP válido");
+      if (!checkoutForm.street.trim()) throw new Error("Informe a rua");
+      if (!checkoutForm.number.trim()) throw new Error("Informe o número");
+      if (!checkoutForm.city.trim()) throw new Error("Informe a cidade");
+      if (!checkoutForm.state.trim() || checkoutForm.state.trim().length !== 2) throw new Error("Informe o UF");
       if (selectedShippingServiceId == null) throw new Error("Selecione uma opção de frete");
 
       const res = await fetch("/api/checkout", {
@@ -217,6 +226,11 @@ export default function Index() {
           },
           address: {
             postalCode: cep,
+            street: checkoutForm.street,
+            number: checkoutForm.number,
+            complement: checkoutForm.complement,
+            city: checkoutForm.city,
+            state: checkoutForm.state,
           },
           shipping: {
             serviceId: selectedShippingServiceId,
@@ -658,6 +672,41 @@ export default function Index() {
                     onChange={(e) => setCheckoutForm((s) => ({ ...s, postalCode: e.target.value }))}
                     inputMode="numeric"
                   />
+                  <FloatingInput
+                    label="Rua"
+                    placeholder="Ex: Av. Exemplo"
+                    value={checkoutForm.street}
+                    onChange={(e) => setCheckoutForm((s) => ({ ...s, street: e.target.value }))}
+                  />
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <FloatingInput
+                      label="Número"
+                      placeholder="Ex: 123"
+                      value={checkoutForm.number}
+                      onChange={(e) => setCheckoutForm((s) => ({ ...s, number: e.target.value }))}
+                      inputMode="numeric"
+                    />
+                    <FloatingInput
+                      label="Complemento (opcional)"
+                      placeholder="Apto, bloco, casa..."
+                      value={checkoutForm.complement}
+                      onChange={(e) => setCheckoutForm((s) => ({ ...s, complement: e.target.value }))}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <FloatingInput
+                      label="Cidade"
+                      placeholder="Ex: Umuarama"
+                      value={checkoutForm.city}
+                      onChange={(e) => setCheckoutForm((s) => ({ ...s, city: e.target.value }))}
+                    />
+                    <FloatingInput
+                      label="UF"
+                      placeholder="PR"
+                      value={checkoutForm.state}
+                      onChange={(e) => setCheckoutForm((s) => ({ ...s, state: e.target.value.toUpperCase() }))}
+                    />
+                  </div>
 
                   {shippingError && (
                     <p className="text-sm text-red-600">{shippingError}</p>

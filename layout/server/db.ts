@@ -23,6 +23,9 @@ export type OrderRow = {
   total_cents: number;
   mp_preference_id: string | null;
   mp_init_point: string | null;
+  mp_payment_id: string | null;
+  mp_payment_status: string | null;
+  paid_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -81,6 +84,9 @@ export function getDb() {
   // light migration for local dev
   ensureColumn(db, "orders", "payment_method", "TEXT NOT NULL DEFAULT 'pix'");
   ensureColumn(db, "orders", "product_qty", "INTEGER NOT NULL DEFAULT 1");
+  ensureColumn(db, "orders", "mp_payment_id", "TEXT");
+  ensureColumn(db, "orders", "mp_payment_status", "TEXT");
+  ensureColumn(db, "orders", "paid_at", "TEXT");
 
   dbSingleton = db;
   return dbSingleton;
@@ -129,4 +135,43 @@ export function getOrderById(orderId: string): OrderRow | undefined {
   const db = getDb();
   const stmt = db.prepare(`SELECT * FROM orders WHERE id = ?`);
   return stmt.get(orderId) as OrderRow | undefined;
+}
+
+export function markOrderPaid(params: {
+  orderId: string;
+  mpPaymentId: string;
+  mpPaymentStatus: string;
+  paidAtIso: string;
+}) {
+  const db = getDb();
+  const stmt = db.prepare(`
+    UPDATE orders
+    SET
+      status = 'paid',
+      mp_payment_id = ?,
+      mp_payment_status = ?,
+      paid_at = ?,
+      updated_at = ?
+    WHERE id = ?
+  `);
+  stmt.run(
+    params.mpPaymentId,
+    params.mpPaymentStatus,
+    params.paidAtIso,
+    new Date().toISOString(),
+    params.orderId,
+  );
+}
+
+export function setOrderPaymentStatus(params: { orderId: string; mpPaymentId: string; mpPaymentStatus: string }) {
+  const db = getDb();
+  const stmt = db.prepare(`
+    UPDATE orders
+    SET
+      mp_payment_id = ?,
+      mp_payment_status = ?,
+      updated_at = ?
+    WHERE id = ?
+  `);
+  stmt.run(params.mpPaymentId, params.mpPaymentStatus, new Date().toISOString(), params.orderId);
 }

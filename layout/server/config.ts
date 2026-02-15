@@ -59,11 +59,15 @@ export const checkoutInputSchema = z.object({
   }),
   address: z.object({
     postalCode: z.string().min(8).transform((v) => v.replace(/\D/g, "")),
-    street: z.string().min(2).optional(),
-    number: z.string().min(1).optional(),
+    street: z.string().min(2),
+    number: z.string().min(1),
     complement: z.string().optional(),
-    city: z.string().min(2).optional(),
-    state: z.string().min(2).max(2).optional(),
+    city: z.string().min(2),
+    state: z
+      .string()
+      .min(2)
+      .max(2)
+      .transform((v) => v.trim().toUpperCase()),
   }),
   shipping: z.object({
     serviceId: z.union([z.string().min(1), z.number()]),
