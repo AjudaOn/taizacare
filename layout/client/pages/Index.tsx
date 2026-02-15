@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
 // Sub-components moved outside to ensure stable component identity
@@ -414,51 +413,54 @@ export default function Index() {
       </section>
 
       {/* Pregnancy Use - Comfort in Every Phase */}
-      <section className="py-32 bg-white">
+      <section className="py-32 bg-[#F9F7F5]">
         <div className="container px-6 mx-auto">
-          <div className="max-w-5xl mx-auto">
-            <div className="rounded-[4rem] bg-[#F9F7F5] border border-[#d2c9be]/20 p-12 lg:p-20 shadow-[0_48px_80px_-16px_rgba(175,164,152,0.10)]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+            <div className="lg:col-span-5">
               <Badge className="bg-[#afa498]/10 text-[#afa498] hover:bg-[#afa498]/10 border-none px-4 py-1 mb-6">
                 Gestação
               </Badge>
               <h2 className="font-aserha text-4xl lg:text-5xl text-[#3a3a3a] leading-[1.1] mb-8">
                 Você não precisa esperar o pós-parto para sentir esse cuidado
               </h2>
-              <p className="text-lg text-[#6c6c6c] font-light leading-relaxed mb-8">
+              <p className="text-lg text-[#6c6c6c] font-light leading-relaxed">
                 A calcinha Taiza Care já pode ser usada durante a gestação. O tecido tecnológico se adapta ao crescimento
                 da barriga sem apertar, sem marcar e sem incomodar.
               </p>
-              <p className="text-[#6c6c6c] font-light leading-relaxed mb-8">
-                Ela acompanha as mudanças do seu corpo mês a mês, oferecendo:
-              </p>
+            </div>
 
-              <ul className="space-y-4 mb-10">
-                {[
-                  "Sustentação suave para o abdome",
-                  "Mais sensação de segurança ao caminhar",
-                  "Conforto para a lombar e pelve no dia a dia",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-[#3a3a3a]">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#afa498]" />
-                    <span className="text-base font-light leading-relaxed text-[#6c6c6c]">{item}</span>
-                  </li>
-                ))}
-              </ul>
+            <div className="lg:col-span-7 space-y-10">
+              <div>
+                <p className="text-[#6c6c6c] font-light leading-relaxed mb-8">
+                  Ela acompanha as mudanças do seu corpo mês a mês, oferecendo:
+                </p>
 
-              <Separator className="bg-[#d2c9be]/30" />
+                <ul className="space-y-4">
+                  {[
+                    "Sustentação suave para o abdome",
+                    "Mais sensação de segurança ao caminhar",
+                    "Conforto para a lombar e pelve no dia a dia",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#afa498]" />
+                      <span className="text-base font-light leading-relaxed text-[#6c6c6c]">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-              <p className="mt-10 text-lg text-[#6c6c6c] font-light leading-relaxed">
-                É cuidado agora.
-                <br />
-                É suporte durante.
-                <br />
-                E continua sendo essencial no pós-parto.
-              </p>
-              <p className="mt-8 text-lg text-[#6c6c6c] font-light leading-relaxed">
-                Porque você merece conforto em todas as fases da maternidade!
-              </p>
+              <div className="text-lg text-[#6c6c6c] font-light leading-relaxed">
+                <p>
+                  É cuidado agora.
+                  <br />
+                  É suporte durante.
+                  <br />
+                  E continua sendo essencial no pós-parto.
+                </p>
+                <p className="mt-8">Porque você merece conforto em todas as fases da maternidade!</p>
+              </div>
 
-              <div className="mt-12">
+              <div>
                 <Button
                   onClick={scrollToCheckout}
                   className="h-14 rounded-full bg-[#3a3a3a] px-8 text-white hover:bg-black transition-all"
