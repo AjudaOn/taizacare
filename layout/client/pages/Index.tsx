@@ -897,14 +897,6 @@ export default function Index() {
             </span>
             <div className="flex gap-6 text-[10px] uppercase tracking-widest font-bold text-[#3a3a3a]">
               <a
-                href="https://ajudaon.com.br"
-                target="_blank"
-                rel="noreferrer"
-                className="font-normal text-[#b3b2b2] hover:text-[#3a3a3a] transition-colors"
-              >
-                Webdeveloper: AjudaOn
-              </a>
-              <a
                 href="https://www.instagram.com/taizapelvica?igsh=djJuaDkxd3lldmk3"
                 target="_blank"
                 rel="noreferrer"
@@ -913,6 +905,17 @@ export default function Index() {
                 Instagram
               </a>
             </div>
+          </div>
+          <div className="mt-6 text-center text-[10px] uppercase tracking-widest text-[#b3b2b2]">
+            Desenvolvido por{" "}
+            <a
+              href="https://ajudaon.com.br"
+              target="_blank"
+              rel="noreferrer"
+              className="font-bold text-[#3a3a3a] hover:text-[#afa498] transition-colors"
+            >
+              AjudaOn
+            </a>
           </div>
         </div>
       </footer>
