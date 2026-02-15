@@ -475,7 +475,7 @@ export default function Index() {
       </section>
 
       {/* Authority - Modern Split Layout */}
-      <section className="py-32 bg-[#F9F7F5]">
+      <section className="py-32 bg-white">
         <div className="container px-6 mx-auto">
           <div className="flex flex-col lg:flex-row bg-white rounded-[4rem] overflow-hidden shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/20">
             <div className="lg:w-1/2 relative min-h-[400px]">
@@ -531,7 +531,7 @@ export default function Index() {
       </section>
 
       {/* Modern Product Details */}
-      <section className="py-32">
+      <section className="py-32 bg-[#F9F7F5]">
         <div className="container px-6 mx-auto">
           <div className="text-center mb-24">
             <h2 className="font-aserha text-4xl lg:text-5xl text-[#3a3a3a] mb-6">Detalhes que Fazem a Diferença</h2>
