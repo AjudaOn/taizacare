@@ -6,6 +6,7 @@ import { handleShippingQuote } from "./routes/shipping-quote";
 import { handleCheckout } from "./routes/checkout";
 import { handleMercadoPagoWebhook } from "./routes/mp-webhook";
 import { handleAdminOrders } from "./routes/admin-orders";
+import { handleAdminN8nTestPaid } from "./routes/admin-n8n-test";
 
 export function createServer() {
   const app = express();
@@ -28,6 +29,7 @@ export function createServer() {
   app.post("/api/checkout", handleCheckout);
   app.post("/api/mp/webhook", handleMercadoPagoWebhook);
   app.get("/api/admin/orders", handleAdminOrders);
+  app.post("/api/admin/n8n/test-paid", handleAdminN8nTestPaid);
 
   return app;
 }
