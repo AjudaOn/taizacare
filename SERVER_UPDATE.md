@@ -6,6 +6,8 @@ Assumindo que o projeto está em `/opt/taizacare` e o remote já está configura
 
 Neste servidor, o site roda via **systemd** (`taizacare.service`). Não use `pm2` para o TaizaCare.
 
+Diretório do projeto no servidor: `/opt/taizacare`.
+
 No servidor, rode **sempre** nesta ordem:
 
 ```sh
