@@ -24,7 +24,7 @@ const FeatureItem = ({ icon, title, desc }: { icon: React.ReactNode, title: stri
     <div className="mb-8 text-brand-taupe opacity-60 group-hover:opacity-100 transition-opacity duration-500">
       {icon}
     </div>
-    <h3 className="font-aserha text-2xl text-brand-charcoal mb-4">{title}</h3>
+    <h3 className="font-brandSerif text-2xl text-brand-charcoal mb-4">{title}</h3>
     <p className="text-brand-ink font-light leading-relaxed text-base">{desc}</p>
   </div>
 );
@@ -79,7 +79,7 @@ const SuccessState = ({ onBack }: { onBack: () => void }) => (
       <div className="w-24 h-24 bg-brand-taupe/5 rounded-full flex items-center justify-center mx-auto mb-8 text-brand-taupe">
         <CheckCircle2 className="w-12 h-12 stroke-[1.5px]" />
       </div>
-      <h1 className="font-aserha text-4xl text-brand-charcoal mb-6">Pedido Realizado</h1>
+      <h1 className="font-brandSerif text-4xl text-brand-charcoal mb-6">Pedido Realizado</h1>
       <p className="text-brand-ink mb-10 leading-relaxed font-light">
         Sua jornada de recuperação começou. Enviamos os detalhes para o seu e-mail.
       </p>
@@ -269,7 +269,7 @@ export default function Index() {
   }
 
       return (
-    <div className="min-h-screen bg-brand-paper font-luxora text-brand-ink selection:bg-brand-taupe/10 overflow-x-hidden">
+    <div className="min-h-screen bg-brand-paper font-brandSans text-brand-ink selection:bg-brand-taupe/10 overflow-x-hidden">
       {/* Dynamic Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-brand-charcoal">
         <div className="container px-6 mx-auto flex items-center justify-between py-4">
@@ -312,7 +312,7 @@ export default function Index() {
                 <span className="h-px w-12 bg-[#afa498]/40" />
                 <span className="text-xs uppercase tracking-[0.3em] font-medium text-[#afa498]">Maternidade Consciente</span>
               </div>
-              <h1 className="font-aserha text-5xl md:text-7xl lg:text-[5.5rem] leading-[0.95] text-[#3a3a3a] mb-8 tracking-tight">
+              <h1 className="font-brandSerif text-5xl md:text-7xl lg:text-[5.5rem] leading-[0.95] text-[#3a3a3a] mb-8 tracking-tight">
                 Conforto <br />
                 <span className="italic font-light text-[#afa498]">Redefinido.</span>
               </h1>
@@ -373,7 +373,7 @@ export default function Index() {
                   </div>
                   <div>
                     <p className="text-[10px] uppercase tracking-widest font-bold text-[#afa498]">Tecnologia</p>
-                    <p className="text-sm font-aserha text-[#3a3a3a]">Compressão Inteligente</p>
+                    <p className="text-sm font-brandSerif text-[#3a3a3a]">Compressão Inteligente</p>
                   </div>
                 </div>
               </motion.div>
@@ -392,7 +392,7 @@ export default function Index() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             <div className="lg:col-span-4 sticky top-32">
               <Badge className="bg-[#afa498]/10 text-[#afa498] hover:bg-[#afa498]/10 border-none px-4 py-1 mb-6">Benefícios</Badge>
-              <h2 className="font-aserha text-4xl lg:text-5xl text-[#3a3a3a] leading-tight mb-8">
+              <h2 className="font-brandSerif text-4xl lg:text-5xl text-[#3a3a3a] leading-tight mb-8">
                 Criada para <br />
                 o novo corpo.
               </h2>
@@ -435,7 +435,7 @@ export default function Index() {
               <Badge className="bg-[#afa498]/10 text-[#afa498] hover:bg-[#afa498]/10 border-none px-4 py-1 mb-6">
                 Gestação
               </Badge>
-              <h2 className="font-aserha text-4xl lg:text-5xl text-[#3a3a3a] leading-[1.1] mb-8">
+              <h2 className="font-brandSerif text-4xl lg:text-5xl text-[#3a3a3a] leading-[1.1] mb-8">
                 Você não precisa esperar o pós-parto para sentir esse cuidado
               </h2>
               <p className="text-lg text-[#6c6c6c] font-light leading-relaxed">
@@ -507,7 +507,7 @@ export default function Index() {
             </div>
             <div className="lg:w-1/2 p-12 lg:p-24 flex flex-col justify-center">
               <span className="text-xs uppercase tracking-[0.3em] text-[#afa498] font-bold mb-6">Expertise Pélvica</span>
-              <h2 className="font-aserha text-4xl text-[#3a3a3a] mb-8 leading-[1.1]">
+              <h2 className="font-brandSerif text-4xl text-[#3a3a3a] mb-8 leading-[1.1]">
                 "A calcinha ideal não apenas aperta; ela acolhe e orienta o corpo de volta ao lugar."
               </h2>
               <p className="text-lg text-[#6c6c6c] font-light leading-relaxed mb-10">
@@ -515,7 +515,7 @@ export default function Index() {
               </p>
               <div className="flex items-center gap-4">
                 <div className="h-px w-8 bg-[#afa498]" />
-                <span className="font-aserha text-xl text-[#3a3a3a]">Dra. Izabela R. Camilo, Fisioterapeuta</span>
+                <span className="font-brandSerif text-xl text-[#3a3a3a]">Dra. Izabela R. Camilo, Fisioterapeuta</span>
               </div>
             </div>
           </div>
@@ -539,7 +539,7 @@ export default function Index() {
             </div>
             <div className="lg:w-1/2 p-12 lg:p-24 flex flex-col justify-center">
               <span className="text-xs uppercase tracking-[0.3em] text-[#afa498] font-bold mb-6">Expertise Pélvica</span>
-              <h2 className="font-aserha text-4xl text-[#3a3a3a] mb-8 leading-[1.1]">
+              <h2 className="font-brandSerif text-4xl text-[#3a3a3a] mb-8 leading-[1.1]">
                 "Uma escolha errada nessa fase pode comprometer a recuperação e trazer prejuízos para o resto da vida."
               </h2>
               <p className="text-lg text-[#6c6c6c] font-light leading-relaxed mb-10">
@@ -550,7 +550,7 @@ export default function Index() {
               </p>
               <div className="flex items-center gap-4">
                 <div className="h-px w-8 bg-[#afa498]" />
-                <span className="font-aserha text-xl text-[#3a3a3a]">Dra. Tainara B. da Mata, Fisioterapeuta</span>
+                <span className="font-brandSerif text-xl text-[#3a3a3a]">Dra. Tainara B. da Mata, Fisioterapeuta</span>
               </div>
             </div>
           </div>
@@ -561,7 +561,7 @@ export default function Index() {
       <section className="py-32 bg-white">
         <div className="container px-6 mx-auto">
           <div className="text-center mb-24">
-            <h2 className="font-aserha text-4xl lg:text-5xl text-[#3a3a3a] mb-6">Detalhes que Fazem a Diferença</h2>
+            <h2 className="font-brandSerif text-4xl lg:text-5xl text-[#3a3a3a] mb-6">Detalhes que Fazem a Diferença</h2>
             <p className="text-[#6c6c6c] font-light">Qualidade superior em cada fibra.</p>
           </div>
           
@@ -595,8 +595,8 @@ export default function Index() {
                {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 text-[#afa498] fill-current" />)}
             </div>
             <div className="relative text-center">
-              <span className="absolute -top-12 left-1/2 -translate-x-1/2 text-[12rem] font-aserha text-[#afa498]/5 -z-10 leading-none">“</span>
-              <p className="font-aserha text-3xl md:text-4xl text-[#3a3a3a] leading-tight mb-12 italic px-8">
+              <span className="absolute -top-12 left-1/2 -translate-x-1/2 text-[12rem] font-brandSerif text-[#afa498]/5 -z-10 leading-none">“</span>
+              <p className="font-brandSerif text-3xl md:text-4xl text-[#3a3a3a] leading-tight mb-12 italic px-8">
                 Superou minhas expectativas. Me senti segura para cuidar da minha filha sem aquela sensação de 'tudo solto' na barriga. Uma compressão confortável, sem me sentir sufocada.
               </p>
               <div className="flex flex-col items-center">
@@ -617,7 +617,7 @@ export default function Index() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-24">
               <div className="space-y-12">
                 <div>
-                  <h2 className="font-aserha text-5xl text-[#3a3a3a] mb-8">Comece sua <br /> Recuperação.</h2>
+                  <h2 className="font-brandSerif text-5xl text-[#3a3a3a] mb-8">Comece sua <br /> Recuperação.</h2>
                   <p className="text-lg text-[#6c6c6c] font-light leading-relaxed">
                     Escolha o tamanho que melhor se adapta a você. Em caso de dúvida, siga as instruções abaixo:
                   </p>
@@ -680,7 +680,7 @@ export default function Index() {
                 <div className="p-8 rounded-[2rem] bg-[#afa498]/5 border border-[#afa498]/10">
                   <div className="flex justify-between items-baseline mb-2">
                     <span className="text-sm text-[#6c6c6c]">Total</span>
-                    <span className="text-4xl font-aserha text-[#3a3a3a]">{formatBRL(totalPriceCents)}</span>
+                    <span className="text-4xl font-brandSerif text-[#3a3a3a]">{formatBRL(totalPriceCents)}</span>
                   </div>
                   <div className="mt-3 space-y-1 text-xs text-[#6c6c6c]">
                     <div className="flex items-center justify-between">
@@ -891,7 +891,7 @@ export default function Index() {
         <div className="container px-6 mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start gap-16 md:gap-0">
             <div>
-              <div className="font-aserha text-3xl text-[#3a3a3a] mb-6">TAIZA CARE</div>
+              <div className="font-brandSerif text-3xl text-[#3a3a3a] mb-6">TAIZA CARE</div>
               <p className="max-w-xs text-sm text-[#b3b2b2] font-light leading-relaxed">
                 Elevando o padrão de cuidado no pós-parto através da união entre medicina pélvica e design minimalista.
               </p>

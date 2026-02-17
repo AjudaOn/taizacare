@@ -86,7 +86,7 @@ export default function Admin() {
       <div className="container mx-auto px-6 py-10">
         <div className="flex items-center justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-aserha text-brand-charcoal">Admin • Pedidos</h1>
+            <h1 className="text-3xl font-brandSerif text-brand-charcoal">Admin • Pedidos</h1>
             <p className="mt-2 text-sm text-brand-gray">
               Lista interna de pedidos (SQLite). Atualiza quando o webhook do Mercado Pago marca como pago.
             </p>
@@ -176,7 +176,7 @@ export default function Admin() {
 
                     <div className="shrink-0 text-right">
                       <div className="text-sm text-brand-gray">Total</div>
-                      <div className="text-2xl font-aserha text-brand-charcoal whitespace-nowrap tabular-nums">
+                      <div className="text-2xl font-brandSerif text-brand-charcoal whitespace-nowrap tabular-nums">
                         {formatBRL(o.total_cents)}
                       </div>
                       <div className="mt-3 space-y-1 text-xs text-brand-gray">
