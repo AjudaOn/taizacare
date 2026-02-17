@@ -518,8 +518,8 @@ export default function Index() {
           <div className="flex flex-col lg:flex-row bg-white rounded-[4rem] overflow-hidden shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/20">
             <div className="lg:w-1/2 relative min-h-[400px]">
               <img
-                src="/calcinha2_960.webp"
-                srcSet={buildWebpSrcSet("calcinha2")}
+                src="/calcinha3_960.webp"
+                srcSet={buildWebpSrcSet("calcinha3")}
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="absolute inset-0 w-full h-full object-cover"
                 alt="Especialista"
