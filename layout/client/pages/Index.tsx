@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
 import { 
   ShieldCheck, 
   Wind, 
@@ -71,9 +70,7 @@ const buildWebpSrcSet = (baseName: string) =>
 
 const SuccessState = ({ onBack }: { onBack: () => void }) => (
   <div className="min-h-screen bg-brand-paper flex items-center justify-center p-6">
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
+    <div 
       className="max-w-md w-full bg-white rounded-[2.5rem] p-12 text-center shadow-[0_32px_64px_-12px_rgba(175,164,152,0.15)] border border-brand-sand/20"
     >
       <div className="w-24 h-24 bg-brand-taupe/5 rounded-full flex items-center justify-center mx-auto mb-8 text-brand-taupe">
@@ -95,7 +92,7 @@ const SuccessState = ({ onBack }: { onBack: () => void }) => (
           Voltar ao início
         </Button>
       </div>
-    </motion.div>
+    </div>
   </div>
 );
 
@@ -305,10 +302,7 @@ export default function Index() {
       <header className="relative min-h-[90vh] flex items-center pt-28">
         <div className="container px-6 mx-auto flex flex-col lg:flex-row items-center gap-16 lg:gap-0">
           <div className="w-full lg:w-1/2 relative z-10 lg:pr-12">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            <div
             >
               <div className="flex items-center gap-3 mb-8">
                 <span className="h-px w-12 bg-[#afa498]/40" />
@@ -338,14 +332,11 @@ export default function Index() {
                   <span className="font-medium underline underline-offset-4">+2.4k avaliações</span>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           <div className="w-full lg:w-1/2 relative flex justify-end">
-            <motion.div
-              initial={{ opacity: 0, scale: 1.1 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            <div
               className="relative w-full aspect-[4/5] max-w-[500px]"
             >
               {/* Main Image with sophisticated border radius */}
@@ -364,9 +355,7 @@ export default function Index() {
                 />
               </div>
               {/* Floating Element 1 */}
-              <motion.div 
-                animate={{ y: [0, -20, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              <div 
                 className="absolute -bottom-10 -left-10 bg-white/80 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border border-white/40 hidden md:block"
               >
                 <div className="flex items-center gap-4">
@@ -378,8 +367,8 @@ export default function Index() {
                     <p className="text-sm font-brandSerif text-[#3a3a3a]">Compressão Inteligente</p>
                   </div>
                 </div>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -576,14 +565,13 @@ export default function Index() {
               "Estabilização com conforto",
               "Desenvolvida por especialistas"
             ].map((item, i) => (
-              <motion.div 
-                whileHover={{ y: -5 }}
+              <div 
                 key={i}
                 className="flex items-center gap-6 p-8 rounded-3xl bg-white border border-[#d2c9be]/20 hover:shadow-xl hover:shadow-[#afa498]/5 transition-all"
               >
                 <div className="w-3 h-3 rounded-full bg-[#afa498]/30" />
                 <span className="text-lg text-[#3a3a3a] font-medium">{item}</span>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>

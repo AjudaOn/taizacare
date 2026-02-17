@@ -18,7 +18,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        brandSerif: ["Cormorant Garamond", "serif"],
+        brandSerif: ["Georgia", "Times New Roman", "serif"],
         brandSans: ["system-ui", "sans-serif"],
       },
       colors: {
