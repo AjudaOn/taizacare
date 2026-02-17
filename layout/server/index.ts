@@ -8,6 +8,7 @@ import { handleCheckout } from "./routes/checkout";
 import { handleMercadoPagoWebhook } from "./routes/mp-webhook";
 import { handleAdminOrders } from "./routes/admin-orders";
 import { handleAdminN8nTestPaid } from "./routes/admin-n8n-test";
+import { handleAdminStockGet, handleAdminStockUpdate } from "./routes/admin-stock";
 
 export function createServer() {
   const app = express();
@@ -32,6 +33,8 @@ export function createServer() {
   app.post("/api/mp/webhook", handleMercadoPagoWebhook);
   app.get("/api/admin/orders", handleAdminOrders);
   app.post("/api/admin/n8n/test-paid", handleAdminN8nTestPaid);
+  app.get("/api/admin/stock", handleAdminStockGet);
+  app.post("/api/admin/stock", handleAdminStockUpdate);
 
   return app;
 }

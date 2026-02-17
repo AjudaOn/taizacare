@@ -3,6 +3,8 @@ import fs from "fs";
 import Database, { type Database as BetterSqliteDatabase } from "better-sqlite3";
 
 export type OrderStatus = "pending_payment" | "paid" | "canceled";
+export type StockSize = "PP" | "P" | "M" | "G" | "GG";
+const STOCK_SIZES: StockSize[] = ["PP", "P", "M", "G", "GG"];
 
 export type OrderRow = {
   id: string;
@@ -27,6 +29,12 @@ export type OrderRow = {
   mp_payment_status: string | null;
   paid_at: string | null;
   created_at: string;
+  updated_at: string;
+};
+
+export type StockRow = {
+  size: StockSize;
+  quantity: number;
   updated_at: string;
 };
 
@@ -79,7 +87,19 @@ export function getDb() {
       updated_at TEXT NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_orders_email_created ON orders(customer_email, created_at);
+    CREATE TABLE IF NOT EXISTS stock_levels (
+      size TEXT PRIMARY KEY,
+      quantity INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT NOT NULL
+    );
   `);
+
+  const now = new Date().toISOString();
+  const seedStmt = db.prepare(`
+    INSERT OR IGNORE INTO stock_levels (size, quantity, updated_at)
+    VALUES (?, 0, ?)
+  `);
+  for (const size of STOCK_SIZES) seedStmt.run(size, now);
 
   // light migration for local dev
   ensureColumn(db, "orders", "payment_method", "TEXT NOT NULL DEFAULT 'pix'");
@@ -186,4 +206,31 @@ export function setOrderPaymentStatus(params: { orderId: string; mpPaymentId: st
     WHERE id = ?
   `);
   stmt.run(params.mpPaymentId, params.mpPaymentStatus, new Date().toISOString(), params.orderId);
+}
+
+export function listStockLevels() {
+  const db = getDb();
+  const stmt = db.prepare(`SELECT size, quantity, updated_at FROM stock_levels ORDER BY CASE size
+    WHEN 'PP' THEN 1
+    WHEN 'P' THEN 2
+    WHEN 'M' THEN 3
+    WHEN 'G' THEN 4
+    WHEN 'GG' THEN 5
+    ELSE 99
+  END`);
+  return stmt.all() as StockRow[];
+}
+
+export function setStockLevels(updates: Partial<Record<StockSize, number>>) {
+  const db = getDb();
+  const now = new Date().toISOString();
+  const updateStmt = db.prepare(`UPDATE stock_levels SET quantity = ?, updated_at = ? WHERE size = ?`);
+  const tx = db.transaction((entries: Array<[StockSize, number]>) => {
+    for (const [size, quantity] of entries) {
+      updateStmt.run(quantity, now, size);
+    }
+  });
+
+  tx(Object.entries(updates) as Array<[StockSize, number]>);
+  return listStockLevels();
 }
