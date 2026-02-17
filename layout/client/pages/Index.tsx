@@ -591,7 +591,7 @@ export default function Index() {
             </div>
             <div className="lg:w-1/2 p-12 lg:p-24 flex flex-col justify-center">
               <span className="text-xs uppercase tracking-[0.3em] text-[#afa498] font-bold mb-6">Expertise Pélvica</span>
-              <h2 className="font-brandSerif text-4xl text-[#3a3a3a] mb-8 leading-[1.1]">
+              <h2 className="font-brandSerif text-3xl md:text-4xl text-[#3a3a3a] mb-8 leading-[1.15] md:leading-[1.1] break-normal [overflow-wrap:normal]">
                 "A calcinha ideal não apenas aperta; ela acolhe e orienta o corpo de volta ao lugar."
               </h2>
               <p className="text-lg text-[#6c6c6c] font-light leading-relaxed mb-10">
@@ -623,7 +623,7 @@ export default function Index() {
             </div>
             <div className="lg:w-1/2 p-12 lg:p-24 flex flex-col justify-center">
               <span className="text-xs uppercase tracking-[0.3em] text-[#afa498] font-bold mb-6">Expertise Pélvica</span>
-              <h2 className="font-brandSerif text-4xl text-[#3a3a3a] mb-8 leading-[1.1]">
+              <h2 className="font-brandSerif text-3xl md:text-4xl text-[#3a3a3a] mb-8 leading-[1.15] md:leading-[1.1] break-normal [overflow-wrap:normal]">
                 "Uma escolha errada nessa fase pode comprometer a recuperação e trazer prejuízos para o resto da vida."
               </h2>
               <p className="text-lg text-[#6c6c6c] font-light leading-relaxed mb-10">
