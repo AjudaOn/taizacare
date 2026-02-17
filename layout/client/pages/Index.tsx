@@ -285,6 +285,8 @@ export default function Index() {
               sizes="(max-width: 768px) 140px, 180px"
               alt="Taiza Care"
               className="h-14 w-auto object-contain md:h-16"
+              width={180}
+              height={64}
               loading="eager"
               decoding="async"
             />
@@ -312,7 +314,7 @@ export default function Index() {
                 <span className="h-px w-12 bg-[#afa498]/40" />
                 <span className="text-xs uppercase tracking-[0.3em] font-medium text-[#afa498]">Maternidade Consciente</span>
               </div>
-              <h1 className="font-brandSerif text-5xl md:text-7xl lg:text-[5.5rem] leading-[0.95] text-[#3a3a3a] mb-8 tracking-tight">
+              <h1 className="text-5xl md:text-7xl lg:text-[5.5rem] leading-[0.95] text-[#3a3a3a] mb-8 tracking-tight">
                 Conforto <br />
                 <span className="italic font-light text-[#afa498]">Redefinido.</span>
               </h1>
