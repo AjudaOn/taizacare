@@ -65,6 +65,10 @@ const FooterColumn = ({ title, links }: { title: string, links: string[] }) => (
   </div>
 );
 
+const responsiveWidths = [320, 480, 640, 768, 960] as const;
+const buildWebpSrcSet = (baseName: string) =>
+  responsiveWidths.map((width) => `/${baseName}_${width}.webp ${width}w`).join(", ");
+
 const SuccessState = ({ onBack }: { onBack: () => void }) => (
   <div className="min-h-screen bg-brand-paper flex items-center justify-center p-6">
     <motion.div 
@@ -276,9 +280,13 @@ export default function Index() {
             aria-label="Voltar ao topo"
           >
             <img
-              src="/logo_branca.png"
+              src="/logo_branca_960.webp"
+              srcSet={buildWebpSrcSet("logo_branca")}
+              sizes="(max-width: 768px) 140px, 180px"
               alt="Taiza Care"
               className="h-14 w-auto object-contain md:h-16"
+              loading="eager"
+              decoding="async"
             />
           </button>
 
@@ -341,9 +349,13 @@ export default function Index() {
               {/* Main Image with sophisticated border radius */}
               <div className="w-full h-full rounded-[4rem] rounded-tr-[12rem] overflow-hidden shadow-[0_64px_96px_-24px_rgba(175,164,152,0.3)]">
                 <img 
-                  src="/calcinha1.jpeg"
+                  src="/calcinha1_960.webp"
+                  srcSet={buildWebpSrcSet("calcinha1")}
+                  sizes="(max-width: 1024px) 100vw, 500px"
                   alt="Product Aesthetic"
                   className="w-full h-full object-cover scale-105"
+                  loading="eager"
+                  decoding="async"
                 />
               </div>
               {/* Floating Element 1 */}
@@ -480,9 +492,13 @@ export default function Index() {
           <div className="flex flex-col lg:flex-row bg-white rounded-[4rem] overflow-hidden shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/20">
             <div className="lg:w-1/2 relative min-h-[400px]">
               <img 
-                src="/calcinha2.jpeg"
+                src="/calcinha2_960.webp"
+                srcSet={buildWebpSrcSet("calcinha2")}
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="absolute inset-0 w-full h-full object-cover"
                 alt="Especialista"
+                loading="lazy"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-black/10" />
             </div>
@@ -508,9 +524,13 @@ export default function Index() {
           <div className="flex flex-col lg:flex-row bg-white rounded-[4rem] overflow-hidden shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/20">
             <div className="lg:w-1/2 relative min-h-[400px]">
               <img
-                src="/calcinha2.jpeg"
+                src="/calcinha2_960.webp"
+                srcSet={buildWebpSrcSet("calcinha2")}
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="absolute inset-0 w-full h-full object-cover"
                 alt="Especialista"
+                loading="lazy"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-black/10" />
             </div>
