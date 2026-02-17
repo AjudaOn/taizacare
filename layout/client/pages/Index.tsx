@@ -354,6 +354,9 @@ export default function Index() {
                   sizes="(max-width: 1024px) 100vw, 500px"
                   alt="Product Aesthetic"
                   className="w-full h-full object-cover scale-105"
+                  width={500}
+                  height={625}
+                  fetchPriority="high"
                   loading="eager"
                   decoding="async"
                 />
