@@ -5,7 +5,7 @@ export default {
   content: [
     "./client/App.tsx",
     "./client/pages/**/*.{ts,tsx}",
-    "./client/components/ui/{badge,button,card,input,toast,toaster,sonner,tooltip}.tsx",
+    "./client/components/ui/{badge,button,card}.tsx",
   ],
   prefix: "",
   theme: {
