@@ -38,6 +38,7 @@ export const env = {
   productSku: process.env.PRODUCT_SKU ?? "calcinha-pos-parto",
   productName: process.env.PRODUCT_NAME ?? "Calcinha Pós-Parto Taiza Care",
   productPixPriceCents: envNumber("PRODUCT_PRICE_PIX_CENTS", 10990),
+  productCardPriceCents: envNumber("PRODUCT_PRICE_CARD_CENTS", 11990),
   cardMarkupPercent: envNumber("CARD_MARKUP_PERCENT", 5),
   productWeightKg: envNumber("PRODUCT_WEIGHT_KG", 0.12),
   productLengthCm: envNumber("PRODUCT_LENGTH_CM", 17),
@@ -47,7 +48,7 @@ export const env = {
 } as const;
 
 export const pricing = {
-  productCardPriceCents: Math.round(env.productPixPriceCents * (1 + env.cardMarkupPercent / 100)),
+  productCardPriceCents: env.productCardPriceCents,
 } as const;
 
 export const shippingQuoteInputSchema = z.object({

@@ -143,7 +143,7 @@ export default function Index() {
   };
 
   const productPixPriceCents = 10990;
-  const productCardPriceCents = Math.round(productPixPriceCents * 1.05);
+  const productCardPriceCents = 11990;
   const productPriceCents = paymentMethod === "pix" ? productPixPriceCents : productCardPriceCents;
   const shippingPriceCents = useMemo(() => {
     if (deliveryMethod === "pickup") return 0;
@@ -740,7 +740,7 @@ export default function Index() {
                   <div className="space-y-6">
                     <h3 className="text-sm uppercase tracking-widest font-bold text-[#3a3a3a]">1. Tamanho</h3>
                     <div className="grid grid-cols-2 gap-3">
-                      {["PP (34-36)", "P (36-38)", "M (40-42)", "G (44-46)", "GG (48-50)"].map((size) => (
+                      {["PP", "P", "M", "G", "GG"].map((size) => (
                         <button
                           key={`step-${size}`}
                           onClick={() => setSelectedSize(size)}
