@@ -118,8 +118,12 @@ export default function Index() {
   const [shippingLoading, setShippingLoading] = useState(false);
   const [shippingError, setShippingError] = useState<string | null>(null);
   const [selectedShippingServiceId, setSelectedShippingServiceId] = useState<string | number | null>(null);
+  const [deliveryMethod, setDeliveryMethod] = useState<"shipping" | "pickup">("shipping");
+  const [addressLookupLoading, setAddressLookupLoading] = useState(false);
+  const [addressLookupError, setAddressLookupError] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "card">("pix");
+  const [checkoutStep, setCheckoutStep] = useState<1 | 2 | 3 | 4>(1);
 
   const whatsappHref = useMemo(() => {
     const phone = "5544999760479";
@@ -142,10 +146,11 @@ export default function Index() {
   const productCardPriceCents = Math.round(productPixPriceCents * 1.05);
   const productPriceCents = paymentMethod === "pix" ? productPixPriceCents : productCardPriceCents;
   const shippingPriceCents = useMemo(() => {
+    if (deliveryMethod === "pickup") return 0;
     if (selectedShippingServiceId == null) return 0;
     const option = shippingOptions.find((o) => String(o.serviceId) === String(selectedShippingServiceId));
     return option?.priceCents ?? 0;
-  }, [selectedShippingServiceId, shippingOptions]);
+  }, [deliveryMethod, selectedShippingServiceId, shippingOptions]);
 
   const productLineCents = productPriceCents * quantity;
   const totalPriceCents = productLineCents + shippingPriceCents;
@@ -154,6 +159,12 @@ export default function Index() {
     (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   useEffect(() => {
+    if (deliveryMethod === "pickup") {
+      setShippingLoading(false);
+      setShippingError(null);
+      return;
+    }
+
     const cep = checkoutForm.postalCode.replace(/\D/g, "");
     if (cep.length !== 8) {
       setShippingOptions([]);
@@ -198,7 +209,47 @@ export default function Index() {
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [checkoutForm.postalCode, selectedShippingServiceId, quantity]);
+  }, [deliveryMethod, checkoutForm.postalCode, selectedShippingServiceId, quantity]);
+
+  useEffect(() => {
+    if (deliveryMethod === "pickup") {
+      setAddressLookupLoading(false);
+      setAddressLookupError(null);
+      return;
+    }
+
+    const cep = checkoutForm.postalCode.replace(/\D/g, "");
+    if (cep.length !== 8) {
+      setAddressLookupLoading(false);
+      setAddressLookupError(null);
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      setAddressLookupLoading(true);
+      setAddressLookupError(null);
+      try {
+        const res = await fetch(`/api/address/lookup?postalCode=${cep}`);
+        const data = await res.json();
+        if (!res.ok || !data?.ok) {
+          throw new Error(data?.error || "CEP não encontrado");
+        }
+
+        setCheckoutForm((prev) => ({
+          ...prev,
+          street: data?.address?.street || prev.street,
+          city: data?.address?.city || prev.city,
+          state: (data?.address?.state || prev.state || "").toUpperCase(),
+        }));
+      } catch (e: any) {
+        setAddressLookupError(e?.message || "Não foi possível buscar o endereço pelo CEP");
+      } finally {
+        setAddressLookupLoading(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timeout);
+  }, [deliveryMethod, checkoutForm.postalCode]);
 
   async function handleCheckout() {
     setCheckoutLoading(true);
@@ -207,13 +258,32 @@ export default function Index() {
       if (!checkoutForm.name.trim()) throw new Error("Informe seu nome");
       if (!checkoutForm.email.trim()) throw new Error("Informe seu e-mail");
       if (!checkoutForm.phone.trim()) throw new Error("Informe seu WhatsApp");
+      const shouldShip = deliveryMethod === "shipping";
       const cep = checkoutForm.postalCode.replace(/\D/g, "");
-      if (cep.length !== 8) throw new Error("Informe um CEP válido");
-      if (!checkoutForm.street.trim()) throw new Error("Informe a rua");
-      if (!checkoutForm.number.trim()) throw new Error("Informe o número");
-      if (!checkoutForm.city.trim()) throw new Error("Informe a cidade");
-      if (!checkoutForm.state.trim() || checkoutForm.state.trim().length !== 2) throw new Error("Informe o UF");
-      if (selectedShippingServiceId == null) throw new Error("Selecione uma opção de frete");
+      if (shouldShip && cep.length !== 8) throw new Error("Informe um CEP válido");
+      if (shouldShip && !checkoutForm.street.trim()) throw new Error("Informe a rua");
+      if (shouldShip && !checkoutForm.number.trim()) throw new Error("Informe o número");
+      if (shouldShip && !checkoutForm.city.trim()) throw new Error("Informe a cidade");
+      if (shouldShip && (!checkoutForm.state.trim() || checkoutForm.state.trim().length !== 2)) {
+        throw new Error("Informe o UF");
+      }
+      if (shouldShip && selectedShippingServiceId == null) throw new Error("Selecione uma opção de frete");
+
+      const shippingPayload =
+        deliveryMethod === "pickup"
+          ? { method: "pickup" as const }
+          : { method: "shipping" as const, serviceId: selectedShippingServiceId as string | number };
+      const addressPayload =
+        deliveryMethod === "shipping"
+          ? {
+              postalCode: cep,
+              street: checkoutForm.street,
+              number: checkoutForm.number,
+              complement: checkoutForm.complement,
+              city: checkoutForm.city,
+              state: checkoutForm.state,
+            }
+          : undefined;
 
       const res = await fetch("/api/checkout", {
         method: "POST",
@@ -225,17 +295,8 @@ export default function Index() {
             email: checkoutForm.email,
             phone: checkoutForm.phone,
           },
-          address: {
-            postalCode: cep,
-            street: checkoutForm.street,
-            number: checkoutForm.number,
-            complement: checkoutForm.complement,
-            city: checkoutForm.city,
-            state: checkoutForm.state,
-          },
-          shipping: {
-            serviceId: selectedShippingServiceId,
-          },
+          address: addressPayload,
+          shipping: shippingPayload,
           product: {
             qty: quantity,
             size: selectedSize,
@@ -259,6 +320,38 @@ export default function Index() {
     } finally {
       setCheckoutLoading(false);
     }
+  }
+
+  function validateStep(step: 1 | 2 | 3 | 4): string | null {
+    if (step === 1 && !selectedSize) return "Selecione um tamanho para continuar";
+    if (step === 3) {
+      if (!checkoutForm.name.trim()) return "Informe seu nome";
+      if (!checkoutForm.email.trim()) return "Informe seu e-mail";
+      if (!checkoutForm.phone.trim()) return "Informe seu WhatsApp";
+    }
+    if (step === 4 && deliveryMethod === "shipping") {
+      const cep = checkoutForm.postalCode.replace(/\D/g, "");
+      if (cep.length !== 8) return "Informe um CEP válido";
+      if (!checkoutForm.street.trim()) return "Informe a rua";
+      if (!checkoutForm.number.trim()) return "Informe o número";
+      if (!checkoutForm.city.trim()) return "Informe a cidade";
+      if (!checkoutForm.state.trim() || checkoutForm.state.trim().length !== 2) return "Informe o UF";
+      if (selectedShippingServiceId == null) return "Selecione uma opção de frete";
+    }
+    return null;
+  }
+
+  function goToNextStep() {
+    const error = validateStep(checkoutStep);
+    if (error) {
+      alert(error);
+      return;
+    }
+    setCheckoutStep((prev) => (prev < 4 ? ((prev + 1) as 1 | 2 | 3 | 4) : prev));
+  }
+
+  function goToPreviousStep() {
+    setCheckoutStep((prev) => (prev > 1 ? ((prev - 1) as 1 | 2 | 3 | 4) : prev));
   }
 
   if (isPurchased) {
@@ -419,7 +512,7 @@ export default function Index() {
       </section>
 
       {/* Pregnancy Use - Comfort in Every Phase */}
-      <section className="py-32 bg-[#f1eeeb]">
+      <section className="py-32 bg-[#f6f2ee]">
         <div className="container px-6 mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             <div className="lg:col-span-5">
@@ -513,7 +606,7 @@ export default function Index() {
         </div>
       </section>
 
-      <section className="py-32 bg-[#f1eeeb]">
+      <section className="py-32 bg-[#f6f2ee]">
         <div className="container px-6 mx-auto">
           <div className="flex flex-col lg:flex-row bg-white rounded-[4rem] overflow-hidden shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/20">
             <div className="lg:w-1/2 relative min-h-[400px]">
@@ -578,7 +671,7 @@ export default function Index() {
       </section>
 
       {/* Testimonials - Elegant & Minimal */}
-      <section className="py-32 bg-[#f1eeeb] relative overflow-hidden">
+      <section className="py-32 bg-[#f6f2ee] relative overflow-hidden">
         <div className="container px-6 mx-auto relative z-10">
           <div className="max-w-4xl mx-auto">
             <div className="flex justify-center mb-12">
@@ -600,110 +693,98 @@ export default function Index() {
         <div className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-[#d2c9be]/30 to-transparent" />
       </section>
 
-      {/* Modern Checkout Section */}
-      <section ref={checkoutRef} className="py-32 bg-white scroll-mt-20">
+      {/* Checkout Step-by-Step Preview */}
+      <section ref={checkoutRef} className="py-28 bg-white scroll-mt-20">
         <div className="container px-6 mx-auto">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-24">
-              <div className="space-y-12">
-                <div>
-                  <h2 className="font-brandSerif text-5xl text-[#3a3a3a] mb-8">Comece sua <br /> Recuperação.</h2>
-                  <p className="text-lg text-[#6c6c6c] font-light leading-relaxed">
-                    Escolha o tamanho que melhor se adapta a você. Em caso de dúvida, siga as instruções abaixo:
-                  </p>
-                </div>
-                
-                <div className="space-y-6">
-                  <h3 className="text-sm uppercase tracking-widest font-bold text-[#3a3a3a]">1. Tamanho</h3>
-                  <p className="text-sm text-[#6c6c6c] font-light leading-relaxed">
-                    <span className="font-medium text-[#3a3a3a]">Para o pós-parto:</span> Se baseie no tamanho de calcinha
-                    que utilizava antes da gestação, pois nossos modelos já são desenvolvidos pensando no ganho de peso
-                    gestacional. Por exemplo: se usava tamanho M antes da gestação, peça a calcinha de tamanho M para o
-                    pós-parto!
-                    <br />
-                    <br />
-                    <span className="font-medium text-[#3a3a3a]">Para a gestação:</span> Invista em um tamanho maior do que
-                    utilizava antes da gestação, para garantir maior conforto conforme houver aumento do abdome!
-                  </p>
-                  <div className="grid grid-cols-2 gap-4">
-                    {["PP (34-36)", "P (36-38)", "M (40-42)", "G (44-46)", "GG (48-50)"].map((size) => (
-                      <button 
-                        key={size}
-                        onClick={() => setSelectedSize(size)}
-                        className={`h-20 rounded-2xl border-2 transition-all flex items-center justify-center font-medium ${
-                          selectedSize === size 
-                            ? 'border-[#3a3a3a] bg-[#3a3a3a] text-white' 
-                            : 'border-[#d2c9be]/30 bg-white hover:border-[#afa498] text-[#3a3a3a]'
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+              <div className="space-y-8 lg:sticky lg:top-28">
+                <h2 className="font-brandSerif text-5xl text-[#3a3a3a] leading-[1.05]">
+                  Comece sua <br /> recuperação.
+                </h2>
+                <p className="text-lg text-[#6c6c6c] font-light leading-relaxed max-w-xl">
+                  Você está a poucos passos de escolher o cuidado certo para este momento. Preencha as etapas abaixo e
+                  finalize com segurança.
+                </p>
+                <div className="rounded-3xl border border-[#d2c9be]/30 bg-[#F9F7F5] p-6 space-y-4">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-[#afa498] font-bold">
+                    Passo {checkoutStep} de 4
+                  </div>
+                  <div className="h-2 rounded-full bg-[#f1eeeb] overflow-hidden">
+                    <div
+                      className="h-full bg-[#3a3a3a] transition-all duration-300"
+                      style={{ width: `${(checkoutStep / 4) * 100}%` }}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 text-[10px] text-center uppercase tracking-[0.12em]">
+                    {["Tamanho", "Pagamento", "Dados", "Entrega"].map((label, index) => (
+                      <button
+                        key={label}
+                        type="button"
+                        onClick={() => setCheckoutStep((index + 1) as 1 | 2 | 3 | 4)}
+                        className={`rounded-xl px-2 py-2 transition ${
+                          checkoutStep === index + 1
+                            ? "bg-[#3a3a3a] text-white"
+                            : "bg-white text-[#6c6c6c] hover:bg-[#f1eeeb]"
                         }`}
                       >
-                        {size}
+                        {label}
                       </button>
                     ))}
-                  </div>
-                  <div className="flex items-center justify-between rounded-2xl border border-[#d2c9be]/30 bg-white p-5">
-                    <div>
-                      <div className="text-sm font-medium text-[#3a3a3a]">Quantidade</div>
-                      <div className="text-xs text-[#6c6c6c]">Selecione quantas unidades</div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                        className="h-10 w-10 rounded-full border border-[#d2c9be]/40 bg-[#F9F7F5] text-[#3a3a3a] hover:bg-white transition"
-                        aria-label="Diminuir quantidade"
-                      >
-                        −
-                      </button>
-                      <div className="min-w-10 text-center text-lg font-medium text-[#3a3a3a]">{quantity}</div>
-                      <button
-                        type="button"
-                        onClick={() => setQuantity((q) => Math.min(10, q + 1))}
-                        className="h-10 w-10 rounded-full border border-[#d2c9be]/40 bg-[#F9F7F5] text-[#3a3a3a] hover:bg-white transition"
-                        aria-label="Aumentar quantidade"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-8 rounded-[2rem] bg-[#afa498]/5 border border-[#afa498]/10">
-                  <div className="flex justify-between items-baseline mb-2">
-                    <span className="text-sm text-[#6c6c6c]">Total</span>
-                    <span className="text-4xl font-brandSerif text-[#3a3a3a]">{formatBRL(totalPriceCents)}</span>
-                  </div>
-                  <div className="mt-3 space-y-1 text-xs text-[#6c6c6c]">
-                    <div className="flex items-center justify-between">
-                      <span>Produto</span>
-                      <span className="font-medium text-[#3a3a3a] whitespace-nowrap tabular-nums">
-                        {formatBRL(productLineCents)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Frete</span>
-                      <span className="font-medium text-[#3a3a3a] whitespace-nowrap tabular-nums">
-                        {shippingLoading ? "Calculando..." : shippingPriceCents ? formatBRL(shippingPriceCents) : "—"}
-                      </span>
-                    </div>
-                    <p className="pt-2 text-[10px] text-[#afa498] font-medium">
-                      {paymentMethod === "pix"
-                        ? "Desconto no PIX • Pagamento instantâneo"
-                        : "Cartão em até 3x • Juros do emissor/operadora"}
-                    </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white p-12 lg:p-16 rounded-[3rem] shadow-[0_48px_80px_-16px_rgba(175,164,152,0.15)] border border-[#d2c9be]/10">
-                <h3 className="text-sm uppercase tracking-widest font-bold text-[#3a3a3a] mb-12 text-center">2. Entrega Expressa</h3>
-                <div className="space-y-8">
-                  <div className="space-y-3 rounded-2xl border border-[#d2c9be]/20 bg-[#F9F7F5] p-4">
-                    <p className="text-[10px] uppercase tracking-widest font-bold text-[#3a3a3a]">
-                      Forma de pagamento
-                    </p>
-                    <div className="grid grid-cols-1 gap-2">
+              <div className="bg-[#fcfbfa] p-8 md:p-10 rounded-[2.5rem] shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/25">
+                {checkoutStep === 1 && (
+                  <div className="space-y-6">
+                    <h3 className="text-sm uppercase tracking-widest font-bold text-[#3a3a3a]">1. Tamanho</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      {["PP (34-36)", "P (36-38)", "M (40-42)", "G (44-46)", "GG (48-50)"].map((size) => (
+                        <button
+                          key={`step-${size}`}
+                          onClick={() => setSelectedSize(size)}
+                          className={`h-16 rounded-2xl border-2 transition-all flex items-center justify-center text-sm font-medium ${
+                            selectedSize === size
+                              ? "border-[#3a3a3a] bg-[#3a3a3a] text-white"
+                              : "border-[#d2c9be]/30 bg-white hover:border-[#afa498] text-[#3a3a3a]"
+                          }`}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between rounded-2xl border border-[#d2c9be]/30 bg-[#F9F7F5] p-4">
+                      <div className="text-sm text-[#3a3a3a]">Quantidade</div>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                          className="h-9 w-9 rounded-full border border-[#d2c9be]/40 bg-white text-[#3a3a3a]"
+                          aria-label="Diminuir quantidade"
+                        >
+                          −
+                        </button>
+                        <div className="min-w-8 text-center text-base font-medium text-[#3a3a3a]">{quantity}</div>
+                        <button
+                          type="button"
+                          onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+                          className="h-9 w-9 rounded-full border border-[#d2c9be]/40 bg-white text-[#3a3a3a]"
+                          aria-label="Aumentar quantidade"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {checkoutStep === 2 && (
+                  <div className="space-y-4">
+                    <h3 className="text-sm uppercase tracking-widest font-bold text-[#3a3a3a]">2. Forma de pagamento</h3>
+                    <div className="space-y-2 rounded-2xl border border-[#d2c9be]/20 bg-[#F9F7F5] p-4">
                       <label
-                        className={`cursor-pointer rounded-xl border px-4 py-3 text-sm transition ${
+                        className={`cursor-pointer rounded-xl border px-4 py-3 text-sm transition block ${
                           paymentMethod === "pix"
                             ? "border-[#3a3a3a] bg-white"
                             : "border-[#d2c9be]/30 bg-white/60 hover:bg-white"
@@ -712,23 +793,20 @@ export default function Index() {
                         <div className="flex items-start gap-3">
                           <input
                             type="radio"
-                            name="pay"
+                            name="pay-stepper"
                             checked={paymentMethod === "pix"}
                             onChange={() => setPaymentMethod("pix")}
                             className="mt-1"
                           />
-                          <div className="min-w-0 flex-1 leading-tight">
+                          <div>
                             <div className="font-medium text-[#3a3a3a]">PIX</div>
-                            <div className="text-xs text-[#6c6c6c]">(com desconto)</div>
-                            <div className="mt-2 font-medium text-[#3a3a3a] whitespace-nowrap tabular-nums">
-                              {formatBRL(productPixPriceCents)}
-                            </div>
-                            <div className="text-xs text-[#6c6c6c]">Pagamento instantâneo</div>
+                            <div className="text-xs text-[#6c6c6c]">Pagamento instantâneo com desconto</div>
+                            <div className="mt-2 font-medium text-[#3a3a3a]">{formatBRL(productPixPriceCents)}</div>
                           </div>
                         </div>
                       </label>
                       <label
-                        className={`cursor-pointer rounded-xl border px-4 py-3 text-sm transition ${
+                        className={`cursor-pointer rounded-xl border px-4 py-3 text-sm transition block ${
                           paymentMethod === "card"
                             ? "border-[#3a3a3a] bg-white"
                             : "border-[#d2c9be]/30 bg-white/60 hover:bg-white"
@@ -737,137 +815,234 @@ export default function Index() {
                         <div className="flex items-start gap-3">
                           <input
                             type="radio"
-                            name="pay"
+                            name="pay-stepper"
                             checked={paymentMethod === "card"}
                             onChange={() => setPaymentMethod("card")}
                             className="mt-1"
                           />
-                          <div className="min-w-0 flex-1 leading-tight">
+                          <div>
                             <div className="font-medium text-[#3a3a3a]">Cartão</div>
-                            <div className="text-xs text-[#6c6c6c]">(em até 3x)</div>
-                            <div className="mt-2 font-medium text-[#3a3a3a] whitespace-nowrap tabular-nums">
-                              {formatBRL(productCardPriceCents)}
-                            </div>
-                            <div className="text-xs text-[#6c6c6c]">Parcelamento no cartão</div>
+                            <div className="text-xs text-[#6c6c6c]">Parcelamento em até 3x</div>
+                            <div className="mt-2 font-medium text-[#3a3a3a]">{formatBRL(productCardPriceCents)}</div>
                           </div>
                         </div>
                       </label>
                     </div>
                   </div>
+                )}
 
-                  <FloatingInput
-                    label="Nome completo"
-                    placeholder="Seu nome"
-                    value={checkoutForm.name}
-                    onChange={(e) => setCheckoutForm((s) => ({ ...s, name: e.target.value }))}
-                  />
-                  <FloatingInput
-                    label="Seu melhor e-mail"
-                    placeholder="contato@exemplo.com"
-                    value={checkoutForm.email}
-                    onChange={(e) => setCheckoutForm((s) => ({ ...s, email: e.target.value }))}
-                    inputMode="email"
-                  />
-                  <FloatingInput
-                    label="WhatsApp"
-                    placeholder="(44) 99976-0479"
-                    value={checkoutForm.phone}
-                    onChange={(e) => setCheckoutForm((s) => ({ ...s, phone: e.target.value }))}
-                    inputMode="tel"
-                  />
-                  <FloatingInput
-                    label="CEP de Entrega"
-                    placeholder="00000-000"
-                    value={checkoutForm.postalCode}
-                    onChange={(e) => setCheckoutForm((s) => ({ ...s, postalCode: e.target.value }))}
-                    inputMode="numeric"
-                  />
-                  <FloatingInput
-                    label="Rua"
-                    placeholder="Ex: Av. Exemplo"
-                    value={checkoutForm.street}
-                    onChange={(e) => setCheckoutForm((s) => ({ ...s, street: e.target.value }))}
-                  />
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                {checkoutStep === 3 && (
+                  <div className="space-y-5">
+                    <h3 className="text-sm uppercase tracking-widest font-bold text-[#3a3a3a]">3. Dados do cliente</h3>
                     <FloatingInput
-                      label="Número"
-                      placeholder="Ex: 123"
-                      value={checkoutForm.number}
-                      onChange={(e) => setCheckoutForm((s) => ({ ...s, number: e.target.value }))}
-                      inputMode="numeric"
+                      label="Nome completo"
+                      placeholder="Seu nome"
+                      value={checkoutForm.name}
+                      onChange={(e) => setCheckoutForm((s) => ({ ...s, name: e.target.value }))}
                     />
                     <FloatingInput
-                      label="Complemento (opcional)"
-                      placeholder="Apto, bloco, casa..."
-                      value={checkoutForm.complement}
-                      onChange={(e) => setCheckoutForm((s) => ({ ...s, complement: e.target.value }))}
+                      label="Seu melhor e-mail"
+                      placeholder="contato@exemplo.com"
+                      value={checkoutForm.email}
+                      onChange={(e) => setCheckoutForm((s) => ({ ...s, email: e.target.value }))}
+                      inputMode="email"
+                    />
+                    <FloatingInput
+                      label="WhatsApp"
+                      placeholder="(44) 99976-0479"
+                      value={checkoutForm.phone}
+                      onChange={(e) => setCheckoutForm((s) => ({ ...s, phone: e.target.value }))}
+                      inputMode="tel"
                     />
                   </div>
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <FloatingInput
-                      label="Cidade"
-                      placeholder="Ex: Umuarama"
-                      value={checkoutForm.city}
-                      onChange={(e) => setCheckoutForm((s) => ({ ...s, city: e.target.value }))}
-                    />
-                    <FloatingInput
-                      label="UF"
-                      placeholder="PR"
-                      value={checkoutForm.state}
-                      onChange={(e) => setCheckoutForm((s) => ({ ...s, state: e.target.value.toUpperCase() }))}
-                    />
-                  </div>
+                )}
 
-                  {shippingError && (
-                    <p className="text-sm text-red-600">{shippingError}</p>
-                  )}
-
-                  {shippingOptions.length > 0 && (
-                    <div className="space-y-3 rounded-2xl border border-[#d2c9be]/20 bg-[#F9F7F5] p-4">
-                      <p className="text-[10px] uppercase tracking-widest font-bold text-[#3a3a3a]">
-                        Opções de frete
-                      </p>
-                      <div className="space-y-2">
-                        {shippingOptions.map((opt) => (
-                          <label
-                            key={String(opt.serviceId)}
-                            className={`flex cursor-pointer items-center justify-between rounded-xl border px-4 py-3 text-sm transition ${
-                              String(selectedShippingServiceId) === String(opt.serviceId)
-                                ? "border-[#3a3a3a] bg-white"
-                                : "border-[#d2c9be]/30 bg-white/60 hover:bg-white"
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <input
-                                type="radio"
-                                name="shipping"
-                                checked={String(selectedShippingServiceId) === String(opt.serviceId)}
-                                onChange={() => setSelectedShippingServiceId(opt.serviceId)}
-                              />
-                              <div className="leading-tight">
-                                <div className="font-medium text-[#3a3a3a]">{opt.name}</div>
-                                {opt.deliveryTime != null && (
-                                  <div className="text-xs text-[#6c6c6c]">{opt.deliveryTime} dia(s)</div>
-                                )}
-                              </div>
-                            </div>
-                            <div className="font-medium text-[#3a3a3a]">{formatBRL(opt.priceCents)}</div>
-                          </label>
-                        ))}
-                      </div>
+                {checkoutStep === 4 && (
+                  <div className="space-y-5">
+                    <h3 className="text-sm uppercase tracking-widest font-bold text-[#3a3a3a]">4. Forma de entrega</h3>
+                    <div className="space-y-2 rounded-2xl border border-[#d2c9be]/20 bg-[#F9F7F5] p-4">
+                      <label
+                        className={`cursor-pointer rounded-xl border px-4 py-3 text-sm transition block ${
+                          deliveryMethod === "shipping"
+                            ? "border-[#3a3a3a] bg-white"
+                            : "border-[#d2c9be]/30 bg-white/60 hover:bg-white"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="radio"
+                            name="delivery-stepper"
+                            checked={deliveryMethod === "shipping"}
+                            onChange={() => setDeliveryMethod("shipping")}
+                            className="mt-1"
+                          />
+                          <div>
+                            <div className="font-medium text-[#3a3a3a]">Receber em casa</div>
+                            <div className="text-xs text-[#6c6c6c]">Frete calculado pelo CEP</div>
+                          </div>
+                        </div>
+                      </label>
+                      <label
+                        className={`cursor-pointer rounded-xl border px-4 py-3 text-sm transition block ${
+                          deliveryMethod === "pickup"
+                            ? "border-[#3a3a3a] bg-white"
+                            : "border-[#d2c9be]/30 bg-white/60 hover:bg-white"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="radio"
+                            name="delivery-stepper"
+                            checked={deliveryMethod === "pickup"}
+                            onChange={() => setDeliveryMethod("pickup")}
+                            className="mt-1"
+                          />
+                          <div>
+                            <div className="font-medium text-[#3a3a3a]">Retirar no local</div>
+                            <div className="text-xs text-[#6c6c6c]">Sem frete</div>
+                          </div>
+                        </div>
+                      </label>
                     </div>
-                  )}
-                  
-                  <div className="pt-8 space-y-4">
-                    <Button 
-                      onClick={handleCheckout}
-                      disabled={checkoutLoading}
-                      className="w-full h-20 bg-[#3a3a3a] hover:bg-black text-white rounded-2xl text-xl font-light shadow-2xl shadow-black/10 flex items-center justify-center gap-3 group transition-all"
+
+                    {deliveryMethod === "shipping" && (
+                      <>
+                        <FloatingInput
+                          label="CEP de Entrega"
+                          placeholder="00000-000"
+                          value={checkoutForm.postalCode}
+                          onChange={(e) => setCheckoutForm((s) => ({ ...s, postalCode: e.target.value }))}
+                          inputMode="numeric"
+                        />
+                        {addressLookupLoading && (
+                          <p className="text-xs text-[#6c6c6c]">Buscando endereço pelo CEP...</p>
+                        )}
+                        {addressLookupError && (
+                          <p className="text-xs text-red-600">{addressLookupError}</p>
+                        )}
+                        <FloatingInput
+                          label="Rua"
+                          placeholder="Ex: Av. Exemplo"
+                          value={checkoutForm.street}
+                          onChange={(e) => setCheckoutForm((s) => ({ ...s, street: e.target.value }))}
+                        />
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                          <FloatingInput
+                            label="Número"
+                            placeholder="Ex: 123"
+                            value={checkoutForm.number}
+                            onChange={(e) => setCheckoutForm((s) => ({ ...s, number: e.target.value }))}
+                            inputMode="numeric"
+                          />
+                          <FloatingInput
+                            label="Complemento (opcional)"
+                            placeholder="Apto, bloco, casa..."
+                            value={checkoutForm.complement}
+                            onChange={(e) => setCheckoutForm((s) => ({ ...s, complement: e.target.value }))}
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                          <FloatingInput
+                            label="Cidade"
+                            placeholder="Ex: Umuarama"
+                            value={checkoutForm.city}
+                            onChange={(e) => setCheckoutForm((s) => ({ ...s, city: e.target.value }))}
+                          />
+                          <FloatingInput
+                            label="UF"
+                            placeholder="PR"
+                            value={checkoutForm.state}
+                            onChange={(e) => setCheckoutForm((s) => ({ ...s, state: e.target.value.toUpperCase() }))}
+                          />
+                        </div>
+                        {shippingError && <p className="text-sm text-red-600">{shippingError}</p>}
+                        {shippingOptions.length > 0 && (
+                          <div className="space-y-2 rounded-2xl border border-[#d2c9be]/20 bg-[#F9F7F5] p-4">
+                            {shippingOptions.map((opt) => (
+                              <label
+                                key={`step-ship-${String(opt.serviceId)}`}
+                                className={`flex cursor-pointer items-center justify-between rounded-xl border px-4 py-3 text-sm transition ${
+                                  String(selectedShippingServiceId) === String(opt.serviceId)
+                                    ? "border-[#3a3a3a] bg-white"
+                                    : "border-[#d2c9be]/30 bg-white/60 hover:bg-white"
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <input
+                                    type="radio"
+                                    name="shipping-stepper"
+                                    checked={String(selectedShippingServiceId) === String(opt.serviceId)}
+                                    onChange={() => setSelectedShippingServiceId(opt.serviceId)}
+                                  />
+                                  <div className="leading-tight">
+                                    <div className="font-medium text-[#3a3a3a]">{opt.name}</div>
+                                    {opt.deliveryTime != null && (
+                                      <div className="text-xs text-[#6c6c6c]">{opt.deliveryTime} dia(s)</div>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="font-medium text-[#3a3a3a]">{formatBRL(opt.priceCents)}</div>
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+
+                <div className="mt-8 space-y-5">
+                  <div className="rounded-2xl border border-[#d2c9be]/20 bg-[#F9F7F5] p-5">
+                    <div className="flex items-center justify-between text-xs text-[#6c6c6c] mb-1">
+                      <span>Produto</span>
+                      <span className="font-medium text-[#3a3a3a]">{formatBRL(productLineCents)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-[#6c6c6c] mb-2">
+                      <span>Frete</span>
+                      <span className="font-medium text-[#3a3a3a]">
+                        {deliveryMethod === "pickup"
+                          ? "Grátis (retirada)"
+                          : shippingLoading
+                            ? "Calculando..."
+                            : shippingPriceCents
+                              ? formatBRL(shippingPriceCents)
+                              : "—"}
+                      </span>
+                    </div>
+                    <div className="pt-2 border-t border-[#d2c9be]/20 flex items-center justify-between">
+                      <span className="text-xs uppercase tracking-[0.15em] text-[#6c6c6c]">Total</span>
+                      <span className="font-brandSerif text-3xl text-[#3a3a3a]">{formatBRL(totalPriceCents)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={goToPreviousStep}
+                      disabled={checkoutStep === 1}
+                      className="h-12 rounded-2xl px-6 text-[#6c6c6c] border border-[#d2c9be]/30 hover:bg-[#f5f1ec]"
                     >
-                      {checkoutLoading ? "Gerando pagamento..." : "Finalizar Compra"}
-                      <ShoppingBag className="w-5 h-5 opacity-50 group-hover:opacity-100 transition-opacity" />
+                      Voltar
                     </Button>
-                    <p className="text-[10px] text-center text-[#b3b2b2] uppercase tracking-[0.2em]">Compra 100% Segura • SSL Encriptado</p>
+                    {checkoutStep < 4 ? (
+                      <Button
+                        type="button"
+                        onClick={goToNextStep}
+                        className="flex-1 h-14 rounded-2xl bg-[#3a3a3a] hover:bg-black text-white"
+                      >
+                        Continuar
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        onClick={handleCheckout}
+                        disabled={checkoutLoading}
+                        className="flex-1 h-14 rounded-2xl bg-[#3a3a3a] hover:bg-black text-white"
+                      >
+                        {checkoutLoading ? "Gerando pagamento..." : "Finalizar Compra"}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -877,7 +1052,7 @@ export default function Index() {
       </section>
 
       {/* Modern Footer */}
-      <footer className="pt-12 pb-24 bg-white border-t border-[#d2c9be]/20">
+      <footer className="pt-12 pb-24 bg-[#f6f2ee] border-t border-[#d2c9be]/20">
         <div className="container px-6 mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start gap-16 md:gap-0">
             <div>
@@ -904,7 +1079,7 @@ export default function Index() {
               <FooterColumn title="Suporte" links={["Trocas", "Privacidade", "Contato"]} />
             </div>
           </div>
-          <div className="mt-24 pt-8 border-t border-[#d2c9be]/10 flex items-center justify-center gap-4 text-[10px] uppercase tracking-widest text-[#b3b2b2]">
+          <div className="mt-12 pt-6 border-t border-[#d2c9be]/10 flex items-center justify-center gap-4 text-[10px] uppercase tracking-widest text-[#b3b2b2]">
             <span>© {new Date().getFullYear()} Taiza Care</span>
             <span aria-hidden="true" className="text-[#d2c9be]">•</span>
             <a

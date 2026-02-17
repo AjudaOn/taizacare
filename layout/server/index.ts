@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { handleShippingQuote } from "./routes/shipping-quote";
+import { handleAddressLookup } from "./routes/address-lookup";
 import { handleCheckout } from "./routes/checkout";
 import { handleMercadoPagoWebhook } from "./routes/mp-webhook";
 import { handleAdminOrders } from "./routes/admin-orders";
@@ -26,6 +27,7 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
   app.post("/api/shipping/quote", handleShippingQuote);
+  app.get("/api/address/lookup", handleAddressLookup);
   app.post("/api/checkout", handleCheckout);
   app.post("/api/mp/webhook", handleMercadoPagoWebhook);
   app.get("/api/admin/orders", handleAdminOrders);

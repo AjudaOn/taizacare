@@ -20,27 +20,59 @@ export const handleCheckout: RequestHandler = async (req, res) => {
     }
 
     const orderId = crypto.randomUUID();
-    const { customer, address, shipping, paymentMethod } = parsed.data;
+    const { customer, shipping, paymentMethod } = parsed.data;
     const productQty = parsed.data.product?.qty ?? 1;
+    let shippingServiceId = "pickup";
+    let shippingServiceName = "Retirada no local";
+    let shippingPriceCents = 0;
+    let shippingToPostalCode = "00000000";
+    let shippingAddress = {
+      postalCode: "00000000",
+      street: "Retirada no local",
+      number: "-",
+      complement: "",
+      city: "",
+      state: "",
+    };
 
-    const quote = await quoteShippingMelhorEnvio({
-      toPostalCode: address.postalCode,
-      serviceIds: [shipping.serviceId],
-      quantity: productQty,
-    });
+    if (shipping.method === "shipping") {
+      const address = parsed.data.address;
+      if (!address) {
+        const response: CheckoutErrorResponse = { ok: false, error: "Informe os dados de entrega" };
+        return res.status(400).json(response);
+      }
 
-    const option = quote.options[0];
-    if (!option) {
-      const response: CheckoutErrorResponse = { ok: false, error: "Não foi possível calcular o frete" };
-      return res.status(400).json(response);
+      const quote = await quoteShippingMelhorEnvio({
+        toPostalCode: address.postalCode,
+        serviceIds: [shipping.serviceId],
+        quantity: productQty,
+      });
+
+      const option = quote.options[0];
+      if (!option) {
+        const response: CheckoutErrorResponse = { ok: false, error: "Não foi possível calcular o frete" };
+        return res.status(400).json(response);
+      }
+
+      if (!isPacOrSedex(option.name)) {
+        const response: CheckoutErrorResponse = { ok: false, error: "Opção de frete inválida" };
+        return res.status(400).json(response);
+      }
+
+      shippingServiceId = String(option.id);
+      shippingServiceName = option.name;
+      shippingPriceCents = option.priceCents;
+      shippingToPostalCode = address.postalCode;
+      shippingAddress = {
+        postalCode: address.postalCode,
+        street: address.street,
+        number: address.number,
+        complement: address.complement ?? "",
+        city: address.city,
+        state: address.state,
+      };
     }
 
-    if (!isPacOrSedex(option.name)) {
-      const response: CheckoutErrorResponse = { ok: false, error: "Opção de frete inválida" };
-      return res.status(400).json(response);
-    }
-
-    const shippingPriceCents = option.priceCents;
     const productPriceCents =
       paymentMethod === "pix" ? env.productPixPriceCents : pricing.productCardPriceCents;
     const totalCents = productPriceCents * productQty + shippingPriceCents;
@@ -52,10 +84,10 @@ export const handleCheckout: RequestHandler = async (req, res) => {
       customer_name: customer.name,
       customer_email: customer.email,
       customer_phone: customer.phone,
-      shipping_to_postal_code: address.postalCode,
-      shipping_address_json: JSON.stringify(address),
-      shipping_service_id: String(option.id),
-      shipping_service_name: option.name,
+      shipping_to_postal_code: shippingToPostalCode,
+      shipping_address_json: JSON.stringify(shippingAddress),
+      shipping_service_id: shippingServiceId,
+      shipping_service_name: shippingServiceName,
       shipping_price_cents: shippingPriceCents,
       product_sku: env.productSku,
       product_name: env.productName,
@@ -79,7 +111,7 @@ export const handleCheckout: RequestHandler = async (req, res) => {
         unitPriceCents: productPriceCents,
       },
       shipping: {
-        title: `Frete - ${option.name}`,
+        title: shipping.method === "pickup" ? "Retirada no local" : `Frete - ${shippingServiceName}`,
         unitPriceCents: shippingPriceCents,
       },
     });
