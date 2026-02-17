@@ -739,6 +739,16 @@ export default function Index() {
                 {checkoutStep === 1 && (
                   <div className="space-y-6">
                     <h3 className="text-sm uppercase tracking-widest font-bold text-[#3a3a3a]">1. Tamanho</h3>
+                    <p className="text-sm text-[#6c6c6c] font-light leading-relaxed">
+                      <span className="font-medium text-[#3a3a3a]">Para o pós-parto:</span> Se baseie no tamanho de calcinha
+                      que utilizava antes da gestação, pois nossos modelos já são desenvolvidos pensando no ganho de peso
+                      gestacional. Por exemplo: se usava tamanho M antes da gestação, peça a calcinha de tamanho M para o
+                      pós-parto.
+                      <br />
+                      <br />
+                      <span className="font-medium text-[#3a3a3a]">Para a gestação:</span> Invista em um tamanho maior do que
+                      utilizava antes da gestação, para garantir maior conforto conforme houver aumento do abdome.
+                    </p>
                     <div className="grid grid-cols-2 gap-3">
                       {["PP", "P", "M", "G", "GG"].map((size) => (
                         <button
