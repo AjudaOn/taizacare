@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        aserha: ["Aserha", "serif"],
-        luxora: ["Luxora Grotesk", "system-ui", "sans-serif"],
+        aserha: ["Cormorant Garamond", "serif"],
+        luxora: ["Inter", "system-ui", "sans-serif"],
       },
       colors: {
         brand: {
