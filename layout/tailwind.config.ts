@@ -19,7 +19,7 @@ export default {
     extend: {
       fontFamily: {
         brandSerif: ["Cormorant Garamond", "serif"],
-        brandSans: ["Inter", "system-ui", "sans-serif"],
+        brandSans: ["system-ui", "sans-serif"],
       },
       colors: {
         brand: {
