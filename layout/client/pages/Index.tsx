@@ -475,10 +475,12 @@ export default function Index() {
         <div className="container px-6 mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             <div className="lg:col-span-4 sticky top-32">
-              <Badge className="bg-[#afa498]/10 text-[#afa498] hover:bg-[#afa498]/10 border-none px-4 py-1 mb-6">Benefícios</Badge>
+              <Badge className="bg-[#3a3a3a] text-white hover:bg-[#3a3a3a] border-none px-5 py-1.5 mb-6 text-[11px] font-semibold tracking-[0.18em] uppercase">
+                Pós-parto
+              </Badge>
               <h2 className="font-brandSerif text-4xl lg:text-5xl text-[#3a3a3a] leading-tight mb-8">
-                Criada para <br />
-                o novo corpo.
+                Criada para o <br />
+                <span className="text-[#8f8172]">Pós-parto.</span>
               </h2>
               <p className="text-[#6c6c6c] font-light leading-relaxed mb-12">
                 O pós-parto exige cuidado, mas não exige que você abra mão de quem você é. Combinamos fisiologia com design minimalista e conforto.
@@ -516,7 +518,7 @@ export default function Index() {
         <div className="container px-6 mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             <div className="lg:col-span-5">
-              <Badge className="bg-[#afa498]/10 text-[#afa498] hover:bg-[#afa498]/10 border-none px-4 py-1 mb-6">
+              <Badge className="bg-[#3a3a3a] text-white hover:bg-[#3a3a3a] border-none px-5 py-1.5 mb-6 text-[11px] font-semibold tracking-[0.18em] uppercase">
                 Gestação
               </Badge>
               <h2 className="font-brandSerif text-4xl lg:text-5xl text-[#3a3a3a] leading-[1.1] mb-8">
@@ -573,8 +575,128 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Authority - Modern Split Layout */}
+      {/* Day-to-Day Use - Comfort Beyond Motherhood */}
       <section className="py-32 bg-white">
+        <div className="container px-6 mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+            <div className="lg:col-span-5">
+              <Badge className="bg-[#3a3a3a] text-white hover:bg-[#3a3a3a] border-none px-5 py-1.5 mb-6 text-[11px] font-semibold tracking-[0.18em] uppercase">
+                Dia a dia
+              </Badge>
+              <h2 className="font-brandSerif text-4xl lg:text-5xl text-[#3a3a3a] leading-[1.1] mb-8">
+                Cuidado funcional para todos os dias
+              </h2>
+              <p className="text-lg text-[#6c6c6c] font-light leading-relaxed">
+                A calcinha de compressão Taiza possui benefícios que vão além da gestação e pós-parto. Ela foi
+                desenvolvida para acompanhar a mulher real: em todas as fases, todos os dias.
+              </p>
+            </div>
+
+            <div className="lg:col-span-7 space-y-10">
+              <div>
+                <div className="flex items-start gap-3 mb-6">
+                  <Sparkles className="h-5 w-5 text-[#afa498] mt-1" />
+                  <p className="text-[#6c6c6c] font-light leading-relaxed">
+                    <span className="font-medium text-[#3a3a3a]">Para usar com roupas justas:</span> aquele vestido
+                    mais ajustado, a alfaiataria estruturada ou a calça de cintura alta que pede um acabamento
+                    impecável.
+                  </p>
+                </div>
+                <p className="text-[#6c6c6c] font-light leading-relaxed mb-6">
+                  A compressão inteligente ajuda a:
+                </p>
+                <ul className="space-y-4">
+                  {[
+                    "Suavizar o abdome",
+                    "Reduzir pequenas saliências",
+                    "Melhorar o caimento da roupa",
+                    "Proporcionar sensação de firmeza sem sufocar",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#afa498]" />
+                      <span className="text-base font-light leading-relaxed text-[#6c6c6c]">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <div className="flex items-start gap-3 mb-6">
+                  <Sparkles className="h-5 w-5 text-[#afa498] mt-1" />
+                  <p className="text-[#6c6c6c] font-light leading-relaxed">
+                    <span className="font-medium text-[#3a3a3a]">Nos dias de inchaço:</span> retenção de líquido,
+                    desconforto abdominal e sensação de estufamento.
+                  </p>
+                </div>
+                <p className="text-[#6c6c6c] font-light leading-relaxed mb-6">A compressão suave:</p>
+                <ul className="space-y-4">
+                  {[
+                    "Ajuda na sensação de contenção e estabilidade",
+                    "Promove maior percepção corporal",
+                    "Oferece segurança e acolhimento ao abdome",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#afa498]" />
+                      <span className="text-base font-light leading-relaxed text-[#6c6c6c]">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <div className="flex items-start gap-3 mb-6">
+                  <Sparkles className="h-5 w-5 text-[#afa498] mt-1" />
+                  <p className="text-[#6c6c6c] font-light leading-relaxed">
+                    <span className="font-medium text-[#3a3a3a]">Durante a TPM:</span> quando o abdome fica mais
+                    sensível e inchado, a calcinha atua como suporte funcional, ajudando a:
+                  </p>
+                </div>
+                <ul className="space-y-4">
+                  {[
+                    "Diminuir a sensação de peso",
+                    "Oferecer estabilidade para a região abdominal",
+                    "Trazer mais conforto ao longo do dia",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#afa498]" />
+                      <span className="text-base font-light leading-relaxed text-[#6c6c6c]">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <div className="flex items-start gap-3 mb-6">
+                  <Sparkles className="h-5 w-5 text-[#afa498] mt-1" />
+                  <p className="text-[#6c6c6c] font-light leading-relaxed">
+                    <span className="font-medium text-[#3a3a3a]">Para o dia a dia corrido:</span> no trabalho, em
+                    longos períodos sentada ou em dias de muito movimento, a compressão funcional:
+                  </p>
+                </div>
+                <ul className="space-y-4">
+                  {[
+                    "Melhora a sensação de postura",
+                    "Proporciona leve sustentação do abdome",
+                    "Aumenta a segurança corporal",
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#afa498]" />
+                      <span className="text-base font-light leading-relaxed text-[#6c6c6c]">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <p className="text-lg text-[#6c6c6c] font-light leading-relaxed">
+                Você se sente mais firme, alinhada e confiante.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Authority - Modern Split Layout */}
+      <section className="py-32 bg-[#f6f2ee]">
         <div className="container px-6 mx-auto">
           <div className="flex flex-col lg:flex-row bg-white rounded-[4rem] overflow-hidden shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/20">
             <div className="lg:w-1/2 relative min-h-[400px]">
@@ -606,7 +728,7 @@ export default function Index() {
         </div>
       </section>
 
-      <section className="py-32 bg-[#f6f2ee]">
+      <section className="py-32 bg-white">
         <div className="container px-6 mx-auto">
           <div className="flex flex-col lg:flex-row bg-white rounded-[4rem] overflow-hidden shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/20">
             <div className="lg:w-1/2 relative min-h-[400px]">
@@ -642,7 +764,7 @@ export default function Index() {
       </section>
 
       {/* Modern Product Details */}
-      <section className="py-32 bg-white">
+      <section className="py-32 bg-[#f6f2ee]">
         <div className="container px-6 mx-auto">
           <div className="text-center mb-24">
             <h2 className="font-brandSerif text-4xl lg:text-5xl text-[#3a3a3a] mb-6">Detalhes que Fazem a Diferença</h2>
@@ -671,7 +793,7 @@ export default function Index() {
       </section>
 
       {/* Testimonials - Elegant & Minimal */}
-      <section className="py-32 bg-[#f6f2ee] relative overflow-hidden">
+      <section className="py-32 bg-white relative overflow-hidden">
         <div className="container px-6 mx-auto relative z-10">
           <div className="max-w-4xl mx-auto">
             <div className="flex justify-center mb-12">
@@ -683,8 +805,21 @@ export default function Index() {
                 Superou minhas expectativas. Me senti segura para cuidar da minha filha sem aquela sensação de 'tudo solto' na barriga. Uma compressão confortável, sem me sentir sufocada.
               </p>
               <div className="flex flex-col items-center">
-                <div className="w-16 h-16 rounded-full bg-[#d2c9be] mb-4 shadow-inner" />
-                <span className="font-bold text-[#3a3a3a]">Laylla Legnani</span>
+                <img
+                  src="/laylla.webp"
+                  alt="Laylla Legnani"
+                  className="w-16 h-16 rounded-full object-cover mb-4 shadow-inner"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <a
+                  href="https://www.instagram.com/layllalegnani?igsh=MTl6bTUyejVibDdsbw=="
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-bold text-[#3a3a3a] hover:text-[#afa498] transition-colors"
+                >
+                  Laylla Legnani
+                </a>
                 <span className="text-sm text-[#afa498]">Mãe da Lorena</span>
               </div>
             </div>
@@ -694,7 +829,7 @@ export default function Index() {
       </section>
 
       {/* Checkout Step-by-Step Preview */}
-      <section ref={checkoutRef} className="py-28 bg-white scroll-mt-20">
+      <section ref={checkoutRef} className="py-28 bg-[#f6f2ee] scroll-mt-20">
         <div className="container px-6 mx-auto">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
@@ -1062,7 +1197,7 @@ export default function Index() {
       </section>
 
       {/* Modern Footer */}
-      <footer className="pt-12 pb-24 bg-[#f6f2ee] border-t border-[#d2c9be]/20">
+      <footer className="pt-12 pb-24 bg-white border-t border-[#d2c9be]/20">
         <div className="container px-6 mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start gap-16 md:gap-0">
             <div>
@@ -1085,7 +1220,7 @@ export default function Index() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-16">
-              <FooterColumn title="Produto" links={["Benefícios", "Tamanhos", "Tecnologia"]} />
+              <FooterColumn title="Produto" links={["Pós-parto", "Tamanhos", "Tecnologia"]} />
               <FooterColumn title="Suporte" links={["Trocas", "Privacidade", "Contato"]} />
             </div>
           </div>
