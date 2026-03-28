@@ -568,7 +568,7 @@ export default function Index() {
       </header>
 
       {/* Benefit Grid - Modern Minimalist */}
-      <section className="hidden py-32 bg-white">
+      <section className="py-32 bg-white">
         <div className="container px-6 mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start lg:items-stretch">
             <div className="lg:col-span-4 sticky top-32 lg:flex lg:flex-col lg:self-stretch lg:items-start">
