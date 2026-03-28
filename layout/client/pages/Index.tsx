@@ -512,7 +512,7 @@ export default function Index() {
       {/* Hero Section - Asymmetrical & Modern */}
       <header className="relative min-h-[90vh] flex items-center pt-28">
         <div className="container px-6 mx-auto flex flex-col lg:flex-row items-center gap-16 lg:gap-0">
-          <div className="order-2 w-full lg:order-1 lg:w-1/2 relative z-10 lg:pr-12">
+          <div className="w-full lg:w-1/2 relative z-10 lg:pr-12">
             <div
             >
               <div className="flex items-center gap-3 mb-8">
@@ -526,6 +526,28 @@ export default function Index() {
               <p className="text-lg md:text-xl text-[#6c6c6c] mb-12 max-w-lg leading-relaxed font-light">
                 Uma calcinha que une a ciência da fisioterapia pélvica a uma estética premium. Desenvolvida para oferecer conforto e segurança na recuperação pós-parto.
               </p>
+              <div className="mb-10 lg:hidden">
+                <div className="relative mx-auto w-full max-w-[420px] aspect-[4/5]">
+                  <div className="w-full h-full rounded-[3rem] rounded-tr-[8rem] overflow-hidden shadow-[0_40px_80px_-28px_rgba(175,164,152,0.35)]">
+                    <img
+                      src="/calcinha1_960.webp"
+                      srcSet={buildWebpSrcSet("calcinha1")}
+                      sizes="100vw"
+                      alt="Product Aesthetic"
+                      className="w-full h-full object-cover scale-105"
+                      width={420}
+                      height={525}
+                      fetchPriority="high"
+                      loading="eager"
+                      decoding="async"
+                      onError={(event) => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src = "/foto_0002.jpeg";
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
               <div className="flex flex-col sm:flex-row gap-6">
                 <Button 
                   onClick={scrollToCheckout}
@@ -546,7 +568,7 @@ export default function Index() {
             </div>
           </div>
 
-          <div className="order-1 w-full lg:order-2 lg:w-1/2 relative flex justify-end">
+          <div className="hidden w-full lg:flex lg:w-1/2 relative justify-end">
             <div
               className="relative w-full aspect-[4/5] max-w-[500px]"
             >
