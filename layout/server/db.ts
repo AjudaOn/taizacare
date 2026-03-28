@@ -12,6 +12,7 @@ export type OrderRow = {
   payment_method: "pix" | "card";
   customer_name: string;
   customer_email: string;
+  customer_cpf: string | null;
   customer_phone: string | null;
   shipping_to_postal_code: string;
   shipping_address_json: string;
@@ -70,6 +71,7 @@ export function getDb() {
       payment_method TEXT NOT NULL,
       customer_name TEXT NOT NULL,
       customer_email TEXT NOT NULL,
+      customer_cpf TEXT,
       customer_phone TEXT,
       shipping_to_postal_code TEXT NOT NULL,
       shipping_address_json TEXT NOT NULL,
@@ -104,6 +106,7 @@ export function getDb() {
   // light migration for local dev
   ensureColumn(db, "orders", "payment_method", "TEXT NOT NULL DEFAULT 'pix'");
   ensureColumn(db, "orders", "product_qty", "INTEGER NOT NULL DEFAULT 1");
+  ensureColumn(db, "orders", "customer_cpf", "TEXT");
   ensureColumn(db, "orders", "mp_payment_id", "TEXT");
   ensureColumn(db, "orders", "mp_payment_status", "TEXT");
   ensureColumn(db, "orders", "paid_at", "TEXT");
@@ -119,7 +122,7 @@ export function insertOrder(row: Omit<OrderRow, "created_at" | "updated_at">) {
     INSERT INTO orders (
       id, status,
       payment_method,
-      customer_name, customer_email, customer_phone,
+      customer_name, customer_email, customer_cpf, customer_phone,
       shipping_to_postal_code, shipping_address_json,
       shipping_service_id, shipping_service_name, shipping_price_cents,
       product_sku, product_name, product_qty, product_price_cents,
@@ -129,7 +132,7 @@ export function insertOrder(row: Omit<OrderRow, "created_at" | "updated_at">) {
     ) VALUES (
       @id, @status,
       @payment_method,
-      @customer_name, @customer_email, @customer_phone,
+      @customer_name, @customer_email, @customer_cpf, @customer_phone,
       @shipping_to_postal_code, @shipping_address_json,
       @shipping_service_id, @shipping_service_name, @shipping_price_cents,
       @product_sku, @product_name, @product_qty, @product_price_cents,

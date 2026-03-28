@@ -1,136 +1,68 @@
-## Atualizar o servidor via Git (VPS)
+## Atualização de produção (fluxo oficial)
 
-Assumindo que o projeto está em `/opt/taizacare` e o remote já está configurado.
+Este arquivo define um fluxo simples:
 
-## Método padrão (OBRIGATÓRIO neste servidor)
+1. A **IA atualiza o código no GitHub** (commit + push na `main`).
+2. O **operador roda manualmente na VPS** os comandos de update.
 
-Neste servidor, o site roda via **systemd** (`taizacare.service`). Não use `pm2` para o TaizaCare.
+Neste servidor, o projeto roda com **systemd** (`taizacare.service`) em `/opt/taizacare`.
+Não usar `pm2` para o TaizaCare.
 
-Diretório do projeto no servidor: `/opt/taizacare`.
+## Responsabilidades
 
-No servidor, rode **sempre** nesta ordem:
+### IA (Codex)
+- Fazer alterações no código.
+- Validar build local quando necessário.
+- Fazer `git commit` e `git push` na `main`.
+- Informar ao operador:
+  - SHA do commit publicado.
+  - Bloco de comandos para rodar na VPS.
+
+### Operador (VPS)
+- Acessar o servidor.
+- Rodar os comandos de atualização.
+- Confirmar status do serviço e logs.
+
+## Comandos que o operador deve rodar na VPS
 
 ```sh
-cd /opt/taizacare && git pull
-```
-
-```sh
+cd /opt/taizacare && git pull origin main
 npm --prefix layout install
-```
-
-```sh
 npm --prefix layout run build
-```
-
-```sh
 systemctl restart taizacare.service
-```
-
-Checagens úteis:
-
-```sh
 systemctl status taizacare.service --no-pager
-```
-
-```sh
 journalctl -u taizacare.service --no-pager | tail -n 80
 ```
 
-## Requisitos (produção)
+## Template de resposta da IA após push
 
-- Node.js `20.19+` (ou `22.12+`). Se você estiver em Node 18, o build pode até rodar mas o Vite pode falhar/avisar.
-- Gerenciador de processo (neste servidor): `systemd` (`taizacare.service`).
+Sempre responder neste formato:
 
-### 1) Acessar o servidor
+```txt
+Código publicado na main.
+Commit: <SHA>
 
-```sh
-ssh root@SEU_IP
-cd /opt/taizacare
-```
-
-### 1.1) (Opcional) Atualizar Node.js (recomendado)
-
-Exemplo com NodeSource (Node 22):
-
-```sh
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt-get update
-sudo apt-get install -y nodejs
-node -v
-```
-
-### 2) Atualizar para o último código
-
-```sh
-git status -sb
-git pull origin main
-git rev-parse --short HEAD
-```
-
-### 3) Rebuild / restart (sem Docker)
-
-Use este bloco somente como referência. O “Método padrão” acima é o que deve ser usado no servidor.
-
-```sh
-# dependências + build (frontend)
+Rode na VPS:
+cd /opt/taizacare && git pull origin main
 npm --prefix layout install
 npm --prefix layout run build
+systemctl restart taizacare.service
+systemctl status taizacare.service --no-pager
+journalctl -u taizacare.service --no-pager | tail -n 80
 ```
 
-### 3.1) Rebuild / restart (sem PM2, com systemd)
+## Requisitos de produção
 
-Se o serviço ainda não existir, crie/ajuste assim:
+- Node.js `20.19+` (ou `22.12+`).
+- Serviço systemd existente: `taizacare.service`.
+- Variáveis de ambiente ficam somente no servidor (`/opt/taizacare/layout/.env`).
 
-```sh
-sudo tee /etc/systemd/system/taizacare.service >/dev/null <<'EOF'
-[Unit]
-Description=TaizaCare
-After=network.target
-
-[Service]
-Type=simple
-WorkingDirectory=/opt/taizacare/layout
-Environment=NODE_ENV=production
-Environment=PORT=3000
-ExecStart=/usr/bin/node /opt/taizacare/layout/dist/server/node-build.mjs
-Restart=on-failure
-RestartSec=3
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-sudo systemctl daemon-reload
-sudo systemctl enable --now taizacare.service
-sudo systemctl restart taizacare.service
-sudo systemctl status taizacare.service --no-pager -l
-```
-
-### 4) Rebuild / restart (com Docker) — quando você criar o Docker
+## Rollback rápido
 
 ```sh
-docker compose pull
-docker compose build --no-cache
-docker compose up -d
-docker compose ps
-docker compose logs -f --tail=100
-```
-
-### Variáveis de ambiente (produção)
-
-- Não commitar `layout/.env` (fica só no servidor).
-- Ajuste no servidor:
-  - `layout/.env` → `PUBLIC_BASE_URL=https://taizacare.com.br`
-  - `MP_ACCESS_TOKEN=...`
-  - `ME_TOKEN=...`
-
-### Rollback rápido (se algo quebrar)
-
-```sh
+cd /opt/taizacare
 git log --oneline -n 10
 git reset --hard <SHA_ANTERIOR>
-
-# reinicia o serviço (systemd ou Docker)
-systemctl restart taizacare.service || true
-docker compose up -d || true
+systemctl restart taizacare.service
+systemctl status taizacare.service --no-pager
 ```

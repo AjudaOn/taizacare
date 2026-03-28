@@ -48,6 +48,7 @@ export const handleAdminN8nTestPaid: RequestHandler = async (req, res) => {
     shipping_price_cents: Number(body.shipping_price_cents ?? 0),
     customer_name: String(body.customer_name ?? "Cliente Teste"),
     customer_email: String(body.customer_email ?? "teste@exemplo.com"),
+    customer_cpf: String(body.customer_cpf ?? "12345678901"),
     customer_phone: String(body.customer_phone ?? "44999999999"),
     paid_at: paidAt,
     created_at: paidAt,
@@ -76,4 +77,3 @@ export const handleAdminN8nTestPaid: RequestHandler = async (req, res) => {
   if (!result.ok) return res.status(502).json({ ok: false, ...result });
   return res.json({ ok: true, ...result });
 };
-

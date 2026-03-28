@@ -34,12 +34,14 @@ const FloatingInput = ({
   value,
   onChange,
   inputMode,
+  required,
 }: {
   label: string;
   placeholder: string;
   value?: string;
   onChange?: React.ChangeEventHandler<HTMLInputElement>;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  required?: boolean;
 }) => (
   <div className="space-y-3">
     <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-brand-gray px-1">{label}</label>
@@ -48,6 +50,7 @@ const FloatingInput = ({
       value={value}
       onChange={onChange}
       inputMode={inputMode}
+      required={required}
       className="w-full h-16 px-6 bg-brand-smoke border-transparent focus:bg-white focus:border-brand-taupe focus:ring-4 focus:ring-brand-taupe/5 rounded-2xl transition-all outline-none text-brand-charcoal placeholder:text-brand-gray/50 font-light"
     />
   </div>
@@ -67,6 +70,13 @@ const FooterColumn = ({ title, links }: { title: string, links: string[] }) => (
 const responsiveWidths = [320, 480, 640, 768, 960] as const;
 const buildWebpSrcSet = (baseName: string) =>
   responsiveWidths.map((width) => `/${baseName}_${width}.webp ${width}w`).join(", ");
+const formatCpf = (value: string) => {
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  return digits
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+};
 
 const SuccessState = ({ onBack }: { onBack: () => void }) => (
   <div className="min-h-screen bg-brand-paper flex items-center justify-center p-6">
@@ -97,6 +107,8 @@ const SuccessState = ({ onBack }: { onBack: () => void }) => (
 );
 
 export default function Index() {
+  const DAY_TO_DAY_FRAME_COUNT = 4;
+  const DAY_TO_DAY_AUTO_ROTATE_MS = 4500;
   const checkoutRef = useRef<HTMLDivElement>(null);
   const [isPurchased, setIsPurchased] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -104,6 +116,7 @@ export default function Index() {
   const [checkoutForm, setCheckoutForm] = useState({
     name: "",
     email: "",
+    cpf: "",
     phone: "",
     postalCode: "",
     street: "",
@@ -124,6 +137,7 @@ export default function Index() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "card">("pix");
   const [checkoutStep, setCheckoutStep] = useState<1 | 2 | 3 | 4>(1);
+  const [dayToDayFrame, setDayToDayFrame] = useState<1 | 2 | 3 | 4>(1);
 
   const whatsappHref = useMemo(() => {
     const phone = "5544999760479";
@@ -137,6 +151,77 @@ export default function Index() {
     checkoutRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const dayToDayFrames = [
+    {
+      id: 1 as const,
+      label: "Roupas",
+      title: "Para usar com roupas justas",
+      description:
+        "A compressão inteligente ajuda no acabamento visual e no caimento sem perder conforto.",
+      bullets: [
+        "Suavizar o abdome",
+        "Reduzir pequenas saliências",
+        "Melhorar o caimento da roupa",
+        "Proporcionar sensação de firmeza sem sufocar",
+      ],
+      image: "/foto_0002.jpeg",
+      alt: "Uso no dia a dia com roupas ajustadas",
+    },
+    {
+      id: 2 as const,
+      label: "Inchaço",
+      title: "Nos dias de inchaço",
+      description:
+        "Quando há retenção de líquido e estufamento, o suporte funcional traz mais estabilidade corporal.",
+      bullets: [
+        "Ajuda na sensação de contenção e estabilidade",
+        "Promove maior percepção corporal",
+        "Oferece segurança e acolhimento ao abdome",
+      ],
+      image: "/foto_0003.jpeg",
+      alt: "Conforto em dias de inchaço abdominal",
+    },
+    {
+      id: 3 as const,
+      label: "TPM",
+      title: "Durante a TPM",
+      description:
+        "Com o abdome mais sensível, a peça atua como suporte suave para reduzir desconfortos do dia.",
+      bullets: [
+        "Diminuir a sensação de peso",
+        "Oferecer estabilidade para a região abdominal",
+        "Trazer mais conforto ao longo do dia",
+      ],
+      image: "/foto_0004.jpeg",
+      alt: "Suporte abdominal em dias de TPM",
+    },
+    {
+      id: 4 as const,
+      label: "Rotina",
+      title: "Para o dia a dia corrido",
+      description:
+        "No trabalho, sentada por longos períodos ou em movimento, o suporte mantém a sensação de alinhamento.",
+      bullets: [
+        "Melhora a sensação de postura",
+        "Proporciona leve sustentação do abdome",
+        "Aumenta a segurança corporal",
+      ],
+      image: "/foto_0005.jpeg",
+      alt: "Rotina ativa com mais sustentação",
+    },
+  ] as const;
+
+  const activeDayToDayFrame = dayToDayFrames[dayToDayFrame - 1] ?? dayToDayFrames[0];
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setDayToDayFrame((prev) => (prev === DAY_TO_DAY_FRAME_COUNT ? 1 : ((prev + 1) as 1 | 2 | 3 | 4)));
+    }, DAY_TO_DAY_AUTO_ROTATE_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
   const handlePurchase = () => {
     setIsPurchased(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -257,6 +342,8 @@ export default function Index() {
       if (!selectedSize) throw new Error("Selecione um tamanho");
       if (!checkoutForm.name.trim()) throw new Error("Informe seu nome");
       if (!checkoutForm.email.trim()) throw new Error("Informe seu e-mail");
+      const cpfDigits = checkoutForm.cpf.replace(/\D/g, "");
+      if (cpfDigits.length !== 11) throw new Error("Informe um CPF válido");
       if (!checkoutForm.phone.trim()) throw new Error("Informe seu WhatsApp");
       const shouldShip = deliveryMethod === "shipping";
       const cep = checkoutForm.postalCode.replace(/\D/g, "");
@@ -293,6 +380,7 @@ export default function Index() {
           customer: {
             name: checkoutForm.name,
             email: checkoutForm.email,
+            cpf: checkoutForm.cpf,
             phone: checkoutForm.phone,
           },
           address: addressPayload,
@@ -327,6 +415,7 @@ export default function Index() {
     if (step === 3) {
       if (!checkoutForm.name.trim()) return "Informe seu nome";
       if (!checkoutForm.email.trim()) return "Informe seu e-mail";
+      if (checkoutForm.cpf.replace(/\D/g, "").length !== 11) return "Informe um CPF válido";
       if (!checkoutForm.phone.trim()) return "Informe seu WhatsApp";
     }
     if (step === 4 && deliveryMethod === "shipping") {
@@ -379,7 +468,11 @@ export default function Index() {
               height={64}
               loading="eager"
               decoding="async"
-            />
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = "/foto_0002.jpeg";
+                    }}
+                  />
           </button>
 
           <Button
@@ -445,7 +538,11 @@ export default function Index() {
                   fetchPriority="high"
                   loading="eager"
                   decoding="async"
-                />
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = "/foto_0002.jpeg";
+                    }}
+                  />
               </div>
               {/* Floating Element 1 */}
               <div 
@@ -471,10 +568,10 @@ export default function Index() {
       </header>
 
       {/* Benefit Grid - Modern Minimalist */}
-      <section className="py-32 bg-white">
+      <section className="hidden py-32 bg-white">
         <div className="container px-6 mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-            <div className="lg:col-span-4 sticky top-32">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start lg:items-stretch">
+            <div className="lg:col-span-4 sticky top-32 lg:flex lg:flex-col lg:self-stretch lg:items-start">
               <Badge className="bg-[#3a3a3a] text-white hover:bg-[#3a3a3a] border-none px-5 py-1.5 mb-6 text-[11px] font-semibold tracking-[0.18em] uppercase">
                 Pós-parto
               </Badge>
@@ -485,90 +582,130 @@ export default function Index() {
               <p className="text-[#6c6c6c] font-light leading-relaxed mb-12">
                 O pós-parto exige cuidado, mas não exige que você abra mão de quem você é. Combinamos fisiologia com design minimalista e conforto.
               </p>
+              <div className="relative w-full mt-8 lg:mt-auto overflow-hidden rounded-[2rem] border border-[#e7dfd8] bg-[#f6f2ee] shadow-[0_22px_50px_-28px_rgba(58,58,58,0.45)]">
+                <img
+                  src="/foto_0001.jpeg"
+                  alt="Postpartum care detail"
+                  className="w-full h-[320px] sm:h-[380px] lg:h-[430px] object-cover object-[center_26%]"
+                  loading="lazy"
+                  decoding="async"
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = "/foto_0002.jpeg";
+                    }}
+                  />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/15 to-transparent" />
+              </div>
             </div>
             
-            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-20">
-              <FeatureItem 
-                icon={<Maximize className="w-10 h-10" />}
-                title="Sustentação Muscular"
-                desc="Proporciona suporte muscular adequado, sem compressão excessiva, permitindo que os músculos abdominais continuem ativos, respeitando o processo de recuperação natural do corpo."
-              />
-              <FeatureItem 
-                icon={<Sparkles className="w-10 h-10" />}
-                title="Drenagem Suave"
-                desc="Com nível de compressão médio, ajuda a reduzir o inchaço dos primeiros dias."
-              />
-              <FeatureItem 
-                icon={<Heart className="w-10 h-10" />}
-                title="Cuidado Cicatricial"
-                desc="Com toque suave nas áreas sensíveis, compressão uniforme do púbis até a cintura e sem costuras, evita acumulo de líquido acima ou abaixo da cicatriz, reduzindo o risco de complicações funcionais e estéticas. A calcinha essencial para a recuperação após cesárea!"
-              />
-              <FeatureItem 
-                icon={<Wind className="w-10 h-10" />}
-                title="Respirabilidade"
-                desc="Tecido premium que mantém a temperatura ideal e a pele seca."
-              />
+            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-14">
+              <div className="rounded-[1.6rem] border border-[#ece4dc] bg-white p-7">
+                <FeatureItem 
+                  icon={<Maximize className="w-10 h-10" />}
+                  title="Sustentação Muscular"
+                  desc="Proporciona suporte muscular adequado, sem compressão excessiva, permitindo que os músculos abdominais continuem ativos, respeitando o processo de recuperação natural do corpo."
+                />
+              </div>
+              <div className="rounded-[1.6rem] border border-[#ece4dc] bg-white p-7">
+                <FeatureItem 
+                  icon={<Sparkles className="w-10 h-10" />}
+                  title="Drenagem Suave"
+                  desc="Com nível de compressão médio, ajuda a reduzir o inchaço dos primeiros dias."
+                />
+              </div>
+              <div className="rounded-[1.6rem] border border-[#ece4dc] bg-white p-7">
+                <FeatureItem 
+                  icon={<Heart className="w-10 h-10" />}
+                  title="Cuidado Cicatricial"
+                  desc="Com toque suave nas áreas sensíveis, compressão uniforme do púbis até a cintura e sem costuras, evita acumulo de líquido acima ou abaixo da cicatriz, reduzindo o risco de complicações funcionais e estéticas. A calcinha essencial para a recuperação após cesárea!"
+                />
+              </div>
+              <div className="rounded-[1.6rem] border border-[#ece4dc] bg-white p-7">
+                <FeatureItem 
+                  icon={<Wind className="w-10 h-10" />}
+                  title="Respirabilidade"
+                  desc="Tecido premium que mantém a temperatura ideal e a pele seca."
+                />
+              </div>
             </div>
           </div>
         </div>
       </section>
-
       {/* Pregnancy Use - Comfort in Every Phase */}
       <section className="py-32 bg-[#f6f2ee]">
         <div className="container px-6 mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-            <div className="lg:col-span-5">
+          <div className="space-y-14">
+            <div>
               <Badge className="bg-[#3a3a3a] text-white hover:bg-[#3a3a3a] border-none px-5 py-1.5 mb-6 text-[11px] font-semibold tracking-[0.18em] uppercase">
                 Gestação
               </Badge>
               <h2 className="font-brandSerif text-4xl lg:text-5xl text-[#3a3a3a] leading-[1.1] mb-8">
                 Você não precisa esperar o pós-parto para sentir esse cuidado
               </h2>
-              <p className="text-lg text-[#6c6c6c] font-light leading-relaxed">
+              <p className="text-lg text-[#6c6c6c] font-light leading-relaxed text-pretty">
                 A calcinha Taiza Care já pode ser usada durante a gestação. O tecido tecnológico se adapta ao crescimento
                 da barriga sem apertar, sem marcar e sem incomodar.
               </p>
             </div>
 
-            <div className="lg:col-span-7 space-y-10">
-              <div>
-                <p className="text-[#6c6c6c] font-light leading-relaxed mb-8">
-                  Ela acompanha as mudanças do seu corpo mês a mês, oferecendo:
-                </p>
-
-                <ul className="space-y-4">
-                  {[
-                    "Sustentação suave para o abdome",
-                    "Mais sensação de segurança ao caminhar",
-                    "Conforto para a lombar e pelve no dia a dia",
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-3">
-                      <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#afa498]" />
-                      <span className="text-base font-light leading-relaxed text-[#6c6c6c]">{item}</span>
-                    </li>
-                  ))}
-                </ul>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start lg:items-stretch">
+              <div className="lg:col-span-5 flex">
+                <div className="relative w-full h-full min-h-[430px] overflow-hidden rounded-[2rem] border border-[#e7dfd8] bg-[#f6f2ee] shadow-[0_22px_50px_-28px_rgba(58,58,58,0.45)]">
+                  <img
+                    src="/foto_0002.jpeg"
+                    alt="Gestação com conforto e sustentação"
+                    className="w-full h-full object-cover object-[center_26%]"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = "/foto_0002.jpeg";
+                    }}
+                  />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/15 to-transparent" />
+                </div>
               </div>
 
-              <div className="text-lg text-[#6c6c6c] font-light leading-relaxed">
-                <p>
-                  É cuidado agora.
-                  <br />
-                  É suporte durante.
-                  <br />
-                  E continua sendo essencial no pós-parto.
-                </p>
-                <p className="mt-8">Porque você merece conforto em todas as fases da maternidade!</p>
-              </div>
+              <div className="lg:col-span-7 flex flex-col gap-10 lg:min-h-[430px]">
+                <div>
+                  <p className="text-[#6c6c6c] font-light leading-relaxed mb-8 text-pretty">
+                    Ela acompanha as mudanças do seu corpo mês a mês, oferecendo:
+                  </p>
 
-              <div>
-                <Button
-                  onClick={scrollToCheckout}
-                  className="h-14 rounded-full bg-[#3a3a3a] px-8 text-white hover:bg-black transition-all"
-                >
-                  Quero esse conforto
-                  <ChevronRight className="ml-2 h-5 w-5 opacity-80" />
-                </Button>
+                  <ul className="space-y-4">
+                    {[
+                      "Sustentação suave para o abdome",
+                      "Mais sensação de segurança ao caminhar",
+                      "Conforto para a lombar e pelve no dia a dia",
+                    ].map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#afa498]" />
+                        <span className="text-base font-light leading-relaxed text-[#6c6c6c]">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="text-lg text-[#6c6c6c] font-light leading-relaxed">
+                  <p>
+                    É cuidado agora.
+                    <br />
+                    É suporte durante.
+                    <br />
+                    E continua sendo essencial no pós-parto.
+                  </p>
+                  <p className="mt-8">Porque você merece conforto em todas as fases da maternidade!</p>
+                </div>
+
+                <div className="mt-auto">
+                  <Button
+                    onClick={scrollToCheckout}
+                    className="h-14 rounded-full bg-[#3a3a3a] px-8 text-white hover:bg-black transition-all"
+                  >
+                    Quero esse conforto
+                    <ChevronRight className="ml-2 h-5 w-5 opacity-80" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -576,7 +713,7 @@ export default function Index() {
       </section>
 
       {/* Day-to-Day Use - Comfort Beyond Motherhood */}
-      <section className="py-32 bg-white">
+      <section className="hidden py-32 bg-white">
         <div className="container px-6 mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
             <div className="lg:col-span-5">
@@ -695,6 +832,100 @@ export default function Index() {
         </div>
       </section>
 
+      {/* Day-to-Day Frames Experience */}
+      <section className="py-28 bg-white">
+        <div className="container px-6 mx-auto">
+          <div className="max-w-6xl mx-auto space-y-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              <div className="lg:col-span-8">
+                <Badge className="bg-[#3a3a3a] text-white hover:bg-[#3a3a3a] border-none px-5 py-1.5 mb-6 text-[11px] font-semibold tracking-[0.18em] uppercase">
+                  Dia a dia
+                </Badge>
+                <h2 className="font-brandSerif text-4xl lg:text-5xl text-[#3a3a3a] leading-[1.1] mb-8">
+                  Cuidado funcional para todos os dias
+                </h2>
+                <p className="text-lg text-[#6c6c6c] font-light leading-relaxed text-pretty">
+                  A calcinha de compressão Taiza possui benefícios que vão além da gestação e pós-parto. Ela foi
+                  desenvolvida para acompanhar a mulher real: em todas as fases, todos os dias.
+                </p>
+              </div>
+
+              <div className="lg:col-span-4 rounded-3xl border border-[#d2c9be]/30 bg-[#F9F7F5] p-6 space-y-4">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-[#afa498] font-bold">
+                  BENEFÍCIOS
+                </div>
+                <div className="h-2 rounded-full bg-[#f1eeeb] overflow-hidden">
+                  <div
+                    className="h-full bg-[#3a3a3a] transition-all duration-300"
+                    style={{ width: `${(dayToDayFrame / DAY_TO_DAY_FRAME_COUNT) * 100}%` }}
+                  />
+                </div>
+                <div className="grid grid-cols-4 gap-2 text-[10px] text-center uppercase tracking-[0.12em]">
+                  {dayToDayFrames.map((frame) => (
+                    <button
+                      key={frame.id}
+                      type="button"
+                      onClick={() => setDayToDayFrame(frame.id)}
+                      className={`rounded-xl px-2 py-2 transition ${
+                        dayToDayFrame === frame.id
+                          ? "bg-[#3a3a3a] text-white"
+                          : "bg-white text-[#6c6c6c] hover:bg-[#f1eeeb]"
+                      }`}
+                    >
+                      {frame.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch">
+              <div className="lg:col-span-5 flex">
+                <div className="relative w-full min-h-[500px] lg:h-[500px] overflow-hidden rounded-[2rem] border border-[#e7dfd8] bg-[#f6f2ee] shadow-[0_22px_50px_-28px_rgba(58,58,58,0.45)]">
+                  <img
+                    src={activeDayToDayFrame.image}
+                    alt={activeDayToDayFrame.alt}
+                    className="absolute inset-0 w-full h-full object-cover object-[center_24%]"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = "/foto_0002.jpeg";
+                    }}
+                  />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/15 to-transparent" />
+                </div>
+              </div>
+
+              <div className="lg:col-span-7 min-h-[500px] bg-[#fcfbfa] p-8 md:p-10 rounded-[2.5rem] shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/25 flex flex-col gap-8">
+                <h3 className="text-sm uppercase tracking-widest font-bold text-[#3a3a3a]">
+                  {dayToDayFrame}. {activeDayToDayFrame.title}
+                </h3>
+                <p className="text-[#6c6c6c] font-light leading-relaxed text-pretty">
+                  {activeDayToDayFrame.description}
+                </p>
+                <ul className="space-y-4">
+                  {activeDayToDayFrame.bullets.map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#afa498]" />
+                      <span className="text-base font-light leading-relaxed text-[#6c6c6c]">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-auto">
+                  <Button
+                    onClick={scrollToCheckout}
+                    className="h-14 rounded-full bg-[#3a3a3a] px-8 text-white hover:bg-black transition-all"
+                  >
+                    Quero esse conforto
+                    <ChevronRight className="ml-2 h-5 w-5 opacity-80" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       {/* Authority - Modern Split Layout */}
       <section className="py-32 bg-[#f6f2ee]">
         <div className="container px-6 mx-auto">
@@ -708,7 +939,11 @@ export default function Index() {
                 alt="Especialista"
                 loading="lazy"
                 decoding="async"
-              />
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = "/foto_0002.jpeg";
+                    }}
+                  />
               <div className="absolute inset-0 bg-black/10" />
             </div>
             <div className="lg:w-1/2 p-12 lg:p-24 flex flex-col justify-center">
@@ -740,7 +975,11 @@ export default function Index() {
                 alt="Especialista"
                 loading="lazy"
                 decoding="async"
-              />
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = "/foto_0002.jpeg";
+                    }}
+                  />
               <div className="absolute inset-0 bg-black/10" />
             </div>
             <div className="lg:w-1/2 p-12 lg:p-24 flex flex-col justify-center">
@@ -811,7 +1050,11 @@ export default function Index() {
                   className="w-16 h-16 rounded-full object-cover mb-4 shadow-inner"
                   loading="lazy"
                   decoding="async"
-                />
+                    onError={(event) => {
+                      event.currentTarget.onerror = null;
+                      event.currentTarget.src = "/foto_0002.jpeg";
+                    }}
+                  />
                 <a
                   href="https://www.instagram.com/layllalegnani?igsh=MTl6bTUyejVibDdsbw=="
                   target="_blank"
@@ -884,7 +1127,7 @@ export default function Index() {
                       <span className="font-medium text-[#3a3a3a]">Para a gestação:</span> Invista em um tamanho maior do que
                       utilizava antes da gestação, para garantir maior conforto conforme houver aumento do abdome.
                     </p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-5 gap-3">
                       {["PP", "P", "M", "G", "GG"].map((size) => (
                         <button
                           key={`step-${size}`}
@@ -984,20 +1227,33 @@ export default function Index() {
                       placeholder="Seu nome"
                       value={checkoutForm.name}
                       onChange={(e) => setCheckoutForm((s) => ({ ...s, name: e.target.value }))}
+                      required
                     />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FloatingInput
+                        label="CPF"
+                        placeholder="000.000.000-00"
+                        value={checkoutForm.cpf}
+                        onChange={(e) => setCheckoutForm((s) => ({ ...s, cpf: formatCpf(e.target.value) }))}
+                        inputMode="numeric"
+                        required
+                      />
+                      <FloatingInput
+                        label="WhatsApp"
+                        placeholder="(44) 99976-0479"
+                        value={checkoutForm.phone}
+                        onChange={(e) => setCheckoutForm((s) => ({ ...s, phone: e.target.value }))}
+                        inputMode="tel"
+                        required
+                      />
+                    </div>
                     <FloatingInput
                       label="Seu melhor e-mail"
                       placeholder="contato@exemplo.com"
                       value={checkoutForm.email}
                       onChange={(e) => setCheckoutForm((s) => ({ ...s, email: e.target.value }))}
                       inputMode="email"
-                    />
-                    <FloatingInput
-                      label="WhatsApp"
-                      placeholder="(44) 99976-0479"
-                      value={checkoutForm.phone}
-                      onChange={(e) => setCheckoutForm((s) => ({ ...s, phone: e.target.value }))}
-                      inputMode="tel"
+                      required
                     />
                   </div>
                 )}
@@ -1275,3 +1531,28 @@ export default function Index() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

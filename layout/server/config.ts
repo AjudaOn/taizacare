@@ -40,7 +40,7 @@ export const env = {
   productPixPriceCents: envNumber("PRODUCT_PRICE_PIX_CENTS", 10990),
   productCardPriceCents: envNumber("PRODUCT_PRICE_CARD_CENTS", 11990),
   cardMarkupPercent: envNumber("CARD_MARKUP_PERCENT", 5),
-  productWeightKg: envNumber("PRODUCT_WEIGHT_KG", 0.12),
+  productWeightKg: envNumber("PRODUCT_WEIGHT_KG", 1),
   productLengthCm: envNumber("PRODUCT_LENGTH_CM", 17),
   productWidthCm: envNumber("PRODUCT_WIDTH_CM", 15),
   productHeightCm: envNumber("PRODUCT_HEIGHT_CM", 3),
@@ -64,6 +64,10 @@ export const checkoutInputSchema = z.object({
   customer: z.object({
     name: z.string().min(2),
     email: z.string().email(),
+    cpf: z
+      .string()
+      .transform((v) => v.replace(/\D/g, ""))
+      .refine((v) => v.length === 11, "CPF inválido"),
     phone: z.string().min(8),
   }),
   address: z

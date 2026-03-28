@@ -49,6 +49,7 @@ export async function notifyN8nOrderPaid(params: PaidNotifyInput) {
       customer: {
         name: params.order.customer_name,
         email: params.order.customer_email,
+        cpf: params.order.customer_cpf,
         phone: params.order.customer_phone,
       },
       paid_at: params.order.paid_at,
@@ -74,7 +75,7 @@ export async function notifyN8nOrderPaid(params: PaidNotifyInput) {
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000);
+  const timeout = setTimeout(() => controller.abort(), 20000);
   try {
     const res = await fetch(env.n8nPaidWebhookUrl, {
       method: "POST",
@@ -92,4 +93,3 @@ export async function notifyN8nOrderPaid(params: PaidNotifyInput) {
     clearTimeout(timeout);
   }
 }
-

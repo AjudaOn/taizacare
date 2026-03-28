@@ -83,6 +83,7 @@ export const handleCheckout: RequestHandler = async (req, res) => {
       payment_method: paymentMethod,
       customer_name: customer.name,
       customer_email: customer.email,
+      customer_cpf: customer.cpf,
       customer_phone: customer.phone,
       shipping_to_postal_code: shippingToPostalCode,
       shipping_address_json: JSON.stringify(shippingAddress),
