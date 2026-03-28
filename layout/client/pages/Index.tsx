@@ -512,7 +512,7 @@ export default function Index() {
       {/* Hero Section - Asymmetrical & Modern */}
       <header className="relative min-h-[90vh] flex items-center pt-28">
         <div className="container px-6 mx-auto flex flex-col lg:flex-row items-center gap-16 lg:gap-0">
-          <div className="w-full lg:w-1/2 relative z-10 lg:pr-12">
+          <div className="order-2 w-full lg:order-1 lg:w-1/2 relative z-10 lg:pr-12">
             <div
             >
               <div className="flex items-center gap-3 mb-8">
@@ -546,7 +546,7 @@ export default function Index() {
             </div>
           </div>
 
-          <div className="w-full lg:w-1/2 relative flex justify-end">
+          <div className="order-1 w-full lg:order-2 lg:w-1/2 relative flex justify-end">
             <div
               className="relative w-full aspect-[4/5] max-w-[500px]"
             >
@@ -885,13 +885,13 @@ export default function Index() {
                     style={{ width: `${(dayToDayFrame / DAY_TO_DAY_FRAME_COUNT) * 100}%` }}
                   />
                 </div>
-                <div className="grid grid-cols-4 gap-2 text-[10px] text-center uppercase tracking-[0.12em]">
+                <div className="grid grid-cols-4 gap-2 text-[9px] sm:text-[10px] text-center uppercase tracking-[0.08em] sm:tracking-[0.12em]">
                   {dayToDayFrames.map((frame) => (
                     <button
                       key={frame.id}
                       type="button"
                       onClick={() => setDayToDayFrame(frame.id)}
-                      className={`rounded-xl px-2 py-2 transition ${
+                      className={`rounded-xl px-2 py-2 whitespace-nowrap transition ${
                         dayToDayFrame === frame.id
                           ? "bg-[#3a3a3a] text-white"
                           : "bg-white text-[#6c6c6c] hover:bg-[#f1eeeb]"
@@ -1119,13 +1119,13 @@ export default function Index() {
                       style={{ width: `${(checkoutStep / 4) * 100}%` }}
                     />
                   </div>
-                  <div className="grid grid-cols-4 gap-2 text-[10px] text-center uppercase tracking-[0.12em]">
+                  <div className="grid grid-cols-4 gap-2 text-[9px] sm:text-[10px] text-center uppercase tracking-[0.08em] sm:tracking-[0.12em]">
                     {["Tamanho", "Pagamento", "Dados", "Entrega"].map((label, index) => (
                       <button
                         key={label}
                         type="button"
                         onClick={() => setCheckoutStep((index + 1) as 1 | 2 | 3 | 4)}
-                        className={`rounded-xl px-2 py-2 transition ${
+                        className={`rounded-xl px-2 py-2 whitespace-nowrap transition ${
                           checkoutStep === index + 1
                             ? "bg-[#3a3a3a] text-white"
                             : "bg-white text-[#6c6c6c] hover:bg-[#f1eeeb]"
