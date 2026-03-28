@@ -109,8 +109,11 @@ const SuccessState = ({ onBack }: { onBack: () => void }) => (
 export default function Index() {
   const DAY_TO_DAY_FRAME_COUNT = 4;
   const DAY_TO_DAY_AUTO_ROTATE_MS = 4500;
+  const DAY_TO_DAY_AUTO_ROTATE_MOBILE_MS = 7000;
   const checkoutRef = useRef<HTMLDivElement>(null);
+  const dayToDaySectionRef = useRef<HTMLElement>(null);
   const [isPurchased, setIsPurchased] = useState(false);
+  const [isDayToDayInView, setIsDayToDayInView] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [checkoutForm, setCheckoutForm] = useState({
@@ -214,14 +217,36 @@ export default function Index() {
   const activeDayToDayFrame = dayToDayFrames[dayToDayFrame - 1] ?? dayToDayFrames[0];
 
   useEffect(() => {
+    const sectionEl = dayToDaySectionRef.current;
+    if (!sectionEl) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        setIsDayToDayInView(Boolean(entry?.isIntersecting));
+      },
+      { threshold: 0.35 },
+    );
+
+    observer.observe(sectionEl);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isDayToDayInView) return;
+
+    const rotateMs = window.matchMedia("(max-width: 768px)").matches
+      ? DAY_TO_DAY_AUTO_ROTATE_MOBILE_MS
+      : DAY_TO_DAY_AUTO_ROTATE_MS;
+
     const intervalId = window.setInterval(() => {
       setDayToDayFrame((prev) => (prev === DAY_TO_DAY_FRAME_COUNT ? 1 : ((prev + 1) as 1 | 2 | 3 | 4)));
-    }, DAY_TO_DAY_AUTO_ROTATE_MS);
+    }, rotateMs);
 
     return () => {
       window.clearInterval(intervalId);
     };
-  }, []);
+  }, [isDayToDayInView]);
   const handlePurchase = () => {
     setIsPurchased(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -654,7 +679,7 @@ export default function Index() {
                   <img
                     src="/foto_0002.jpeg"
                     alt="Gestação com conforto e sustentação"
-                    className="w-full h-full object-cover object-[center_26%]"
+                    className="absolute inset-0 block w-full h-full object-cover object-[center_24%] sm:object-[center_26%]"
                     loading="lazy"
                     decoding="async"
                     onError={(event) => {
@@ -662,7 +687,7 @@ export default function Index() {
                       event.currentTarget.src = "/foto_0002.jpeg";
                     }}
                   />
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/15 to-transparent" />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/20 via-black/8 to-transparent" />
                 </div>
               </div>
 
@@ -833,9 +858,9 @@ export default function Index() {
       </section>
 
       {/* Day-to-Day Frames Experience */}
-      <section className="py-28 bg-white">
+      <section ref={dayToDaySectionRef} className="py-28 bg-white">
         <div className="container px-6 mx-auto">
-          <div className="max-w-6xl mx-auto space-y-10">
+          <div className="space-y-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               <div className="lg:col-span-8">
                 <Badge className="bg-[#3a3a3a] text-white hover:bg-[#3a3a3a] border-none px-5 py-1.5 mb-6 text-[11px] font-semibold tracking-[0.18em] uppercase">
@@ -932,8 +957,8 @@ export default function Index() {
           <div className="flex flex-col lg:flex-row bg-white rounded-[4rem] overflow-hidden shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/20">
             <div className="lg:w-1/2 relative min-h-[400px]">
               <img 
-                src="/calcinha2_960.webp"
-                srcSet={buildWebpSrcSet("calcinha2")}
+                src="/bella_960.webp"
+                srcSet={buildWebpSrcSet("bella")}
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="absolute inset-0 w-full h-full object-cover"
                 alt="Especialista"
@@ -968,8 +993,8 @@ export default function Index() {
           <div className="flex flex-col lg:flex-row bg-white rounded-[4rem] overflow-hidden shadow-[0_48px_80px_-16px_rgba(175,164,152,0.12)] border border-[#d2c9be]/20">
             <div className="lg:w-1/2 relative min-h-[400px]">
               <img
-                src="/calcinha3_960.webp"
-                srcSet={buildWebpSrcSet("calcinha3")}
+                src="/tai_960.webp"
+                srcSet={buildWebpSrcSet("tai")}
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="absolute inset-0 w-full h-full object-cover"
                 alt="Especialista"
@@ -1074,7 +1099,7 @@ export default function Index() {
       {/* Checkout Step-by-Step Preview */}
       <section ref={checkoutRef} className="py-28 bg-[#f6f2ee] scroll-mt-20">
         <div className="container px-6 mx-auto">
-          <div className="max-w-6xl mx-auto">
+          <div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
               <div className="space-y-8 lg:sticky lg:top-28">
                 <h2 className="font-brandSerif text-5xl text-[#3a3a3a] leading-[1.05]">
