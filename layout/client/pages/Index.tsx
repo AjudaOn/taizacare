@@ -167,7 +167,7 @@ export default function Index() {
         "Melhorar o caimento da roupa",
         "Proporcionar sensação de firmeza sem sufocar",
       ],
-      image: "/foto_0002.jpeg",
+      image: "/foto_0003.jpeg",
       alt: "Uso no dia a dia com roupas ajustadas",
     },
     {
@@ -181,7 +181,7 @@ export default function Index() {
         "Promove maior percepção corporal",
         "Oferece segurança e acolhimento ao abdome",
       ],
-      image: "/foto_0003.jpeg",
+      image: "/inchaco_960.webp",
       alt: "Conforto em dias de inchaço abdominal",
     },
     {
@@ -195,7 +195,7 @@ export default function Index() {
         "Oferecer estabilidade para a região abdominal",
         "Trazer mais conforto ao longo do dia",
       ],
-      image: "/foto_0004.jpeg",
+      image: "/tpm_960.webp",
       alt: "Suporte abdominal em dias de TPM",
     },
     {
@@ -495,7 +495,7 @@ export default function Index() {
               decoding="async"
                     onError={(event) => {
                       event.currentTarget.onerror = null;
-                      event.currentTarget.src = "/foto_0002.jpeg";
+                      event.currentTarget.src = "/foto_0003.jpeg";
                     }}
                   />
           </button>
@@ -937,7 +937,7 @@ export default function Index() {
                     decoding="async"
                     onError={(event) => {
                       event.currentTarget.onerror = null;
-                      event.currentTarget.src = "/foto_0002.jpeg";
+                      event.currentTarget.src = "/foto_0003.jpeg";
                     }}
                   />
                   <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/15 to-transparent" />
@@ -988,7 +988,7 @@ export default function Index() {
                 decoding="async"
                     onError={(event) => {
                       event.currentTarget.onerror = null;
-                      event.currentTarget.src = "/foto_0002.jpeg";
+                      event.currentTarget.src = "/foto_0003.jpeg";
                     }}
                   />
               <div className="absolute inset-0 bg-black/10" />
@@ -1165,30 +1165,35 @@ export default function Index() {
                   <div className="space-y-6">
                     <h3 className="text-sm uppercase tracking-widest font-bold text-[#3a3a3a]">1. Tamanho</h3>
                     <p className="text-sm text-[#6c6c6c] font-light leading-relaxed">
-                      <span className="font-medium text-[#3a3a3a]">Para o pós-parto:</span> Se baseie no tamanho de calcinha
-                      que utilizava antes da gestação, pois nossos modelos já são desenvolvidos pensando no ganho de peso
-                      gestacional. Por exemplo: se usava tamanho M antes da gestação, peça a calcinha de tamanho M para o
-                      pós-parto.
+                      <span className="font-medium text-[#3a3a3a]">Como escolher o seu:</span> Se baseie no tamanho de calcinha que utilizava antes da gestação, pois nossos modelos já são desenvolvidos pensando no ganho de peso gestacional. Por exemplo: se usava tamanho M antes da gestação, peça a calcinha de tamanho M para o pós parto! Ainda tem dúvida? Você também pode se basear pelo tamanho de calça jeans que utilizava antes da gestação.
                       <br />
                       <br />
                       <span className="font-medium text-[#3a3a3a]">Para a gestação:</span> Invista em um tamanho maior do que
                       utilizava antes da gestação, para garantir maior conforto conforme houver aumento do abdome.
                     </p>
                     <div className="grid grid-cols-5 gap-3">
-                      {["PP", "P", "M", "G", "GG"].map((size) => (
+                      {[
+                        { sigla: "PP", num: "34" },
+                        { sigla: "P", num: "36/38" },
+                        { sigla: "M", num: "40/42" },
+                        { sigla: "G", num: "44" },
+                        { sigla: "GG", num: "46 em diante" },
+                      ].map(({ sigla, num }) => (
                         <button
-                          key={`step-${size}`}
-                          onClick={() => setSelectedSize(size)}
-                          className={`h-16 rounded-2xl border-2 transition-all flex items-center justify-center text-sm font-medium ${
-                            selectedSize === size
+                          key={`step-${sigla}`}
+                          onClick={() => setSelectedSize(sigla)}
+                          className={`h-16 rounded-2xl border-2 transition-all flex flex-col items-center justify-center leading-tight ${
+                            selectedSize === sigla
                               ? "border-[#3a3a3a] bg-[#3a3a3a] text-white"
                               : "border-[#d2c9be]/30 bg-white hover:border-[#afa498] text-[#3a3a3a]"
                           }`}
                         >
-                          {size}
+                          <span>{sigla}</span>
+                          <span className="text-[11px] opacity-80">{num}</span>
                         </button>
                       ))}
                     </div>
+                   
                     <div className="flex items-center justify-between rounded-2xl border border-[#d2c9be]/30 bg-[#F9F7F5] p-4">
                       <div className="text-sm text-[#3a3a3a]">Quantidade</div>
                       <div className="flex items-center gap-3">
