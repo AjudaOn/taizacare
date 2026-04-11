@@ -69,7 +69,14 @@ const FooterColumn = ({ title, links }: { title: string, links: string[] }) => (
 
 const responsiveWidths = [320, 480, 640, 768, 960] as const;
 const buildWebpSrcSet = (baseName: string) =>
-  responsiveWidths.map((width) => `/${baseName}_${width}.webp ${width}w`).join(", ");
+  responsiveWidths
+    .map((width) => {
+      if (baseName === "bella" && width === 320) {
+        return `/bella_320a.webp 320w`;
+      }
+      return `/${baseName}_${width}.webp ${width}w`;
+    })
+    .join(", ");
 const formatCpf = (value: string) => {
   const digits = value.replace(/\D/g, "").slice(0, 11);
   return digits
@@ -1511,7 +1518,7 @@ export default function Index() {
             <div>
               <div className="font-brandSerif text-3xl text-[#3a3a3a] mb-6">TAIZA CARE</div>
               <p className="max-w-xs text-sm text-[#b3b2b2] font-light leading-relaxed">
-                Elevando o padrão de cuidado no pós-parto através da união entre medicina pélvica e design minimalista.
+                Elevando o padrão de cuidado no pós-parto através da união entre fisioterapia pélvica e design minimalista.
               </p>
               <div className="mt-8 space-y-2 text-xs text-[#6c6c6c]">
                 <div className="font-medium text-[#3a3a3a]">Taiza Care serviços de fisioterapia LTDA</div>
