@@ -1,4 +1,4 @@
-import { env, pricing } from "../config";
+import { env } from "../config";
 
 export type MelhorEnvioServiceQuote = {
   id: number | string;
@@ -9,6 +9,90 @@ export type MelhorEnvioServiceQuote = {
   company?: { name?: string };
   error?: string;
 };
+
+type ShipmentProduct = {
+  id: string;
+  width: number;
+  height: number;
+  length: number;
+  weight: number;
+  quantity: 1;
+};
+
+type PackageSpec = {
+  kind: "small" | "large";
+  units: number;
+  width: number;
+  height: number;
+  length: number;
+  weight: number;
+};
+
+const SMALL_PACKAGE_SPECS: Record<1 | 2 | 3, Omit<PackageSpec, "kind" | "units">> = {
+  1: { width: 20, height: 3, length: 26, weight: 0.14 },
+  2: { width: 20, height: 5, length: 27, weight: 0.27 },
+  3: { width: 20, height: 7, length: 27, weight: 0.4 },
+};
+
+const LARGE_PACKAGE_SPEC = {
+  width: 40,
+  height: 7,
+  length: 50,
+} as const;
+
+function buildShipmentPackages(quantity: number): PackageSpec[] {
+  if (quantity <= 3) {
+    const spec = SMALL_PACKAGE_SPECS[quantity as 1 | 2 | 3];
+    return [{ kind: "small", units: quantity, ...spec }];
+  }
+
+  if (quantity <= 6) {
+    const weightByUnits = { 4: 0.54, 5: 0.67, 6: 0.8 } as const;
+    return [
+      {
+        kind: "large",
+        units: quantity,
+        ...LARGE_PACKAGE_SPEC,
+        weight: weightByUnits[quantity as 4 | 5 | 6],
+      },
+    ];
+  }
+
+  const remainder = quantity - 6;
+  const packages: PackageSpec[] = [
+    {
+      kind: "large",
+      units: 6,
+      ...LARGE_PACKAGE_SPEC,
+      weight: 0.8,
+    },
+  ];
+
+  if (remainder <= 3) {
+    const spec = SMALL_PACKAGE_SPECS[remainder as 1 | 2 | 3];
+    packages.push({ kind: "small", units: remainder, ...spec });
+    return packages;
+  }
+
+  packages.push({
+    kind: "large",
+    units: 4,
+    ...LARGE_PACKAGE_SPEC,
+    weight: 0.54,
+  });
+  return packages;
+}
+
+function buildShipmentProducts(quantity: number): ShipmentProduct[] {
+  return buildShipmentPackages(quantity).map((pkg, index) => ({
+    id: `${env.productSku}-${pkg.kind}-${pkg.units}-${index + 1}`,
+    width: pkg.width,
+    height: pkg.height,
+    length: pkg.length,
+    weight: pkg.weight,
+    quantity: 1,
+  }));
+}
 
 function parsePriceToCents(value: unknown) {
   const raw = (typeof value === "number" ? String(value) : String(value ?? ""))
@@ -66,17 +150,7 @@ export async function quoteShippingMelhorEnvio(params: {
   const body = {
     from: { postal_code: env.shippingOriginPostalCode },
     to: { postal_code: params.toPostalCode },
-    products: [
-      {
-        id: env.productSku,
-        width: env.productWidthCm,
-        height: env.productHeightCm,
-        length: env.productLengthCm,
-        weight: env.productWeightKg,
-        insurance_value: pricing.productCardPriceCents / 100,
-        quantity,
-      },
-    ],
+    products: buildShipmentProducts(quantity),
     options: {
       receipt: false,
       own_hand: false,
