@@ -1044,7 +1044,7 @@ export default function Index() {
               <p className="text-lg text-[#6c6c6c] font-light leading-relaxed mb-10">
                 Recebo diversas pacientes com queixas relacionadas a cicatrização pós-parto. Muitas vezes é devido ao uso
                 de calcinhas e cintas inadequadas, que possuem tecidos diferentes, compressões irregulares, costuras
-                sobre a cicatriz ou compressão excessiva, que resultam em resultados estéticos e funcionais
+                sobre a cicatriz ou compressão excessiva, que geram resultados estéticos e funcionais
                 desfavoráveis.
               </p>
               <div className="flex items-center gap-4">
