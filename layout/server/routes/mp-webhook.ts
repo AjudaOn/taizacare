@@ -1,9 +1,12 @@
 import { RequestHandler } from "express";
 import { env } from "../config";
-import { getOrderById, markOrderPaid, setOrderPaymentStatus } from "../db";
+import { getOrderById } from "../db";
 import crypto from "crypto";
-import { notifyN8nOrderPaid } from "../integrations/n8n";
-
+import {
+  fetchMercadoPagoPayment,
+  reconcileOrderPayment,
+  scheduleOrderPaymentReconciliation,
+} from "../integrations/mercadopago-reconcile";
 function extractPaymentIdFromBody(body: any): string | null {
   if (!body || typeof body !== "object") return null;
   if (typeof body.id === "string" || typeof body.id === "number") return String(body.id);
@@ -80,21 +83,6 @@ function verifyWebhookSignature(params: {
   return { ok: true as const };
 }
 
-async function fetchMercadoPagoPayment(paymentId: string) {
-  const url = `https://api.mercadopago.com/v1/payments/${encodeURIComponent(paymentId)}`;
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${env.mpAccessToken}`,
-      "Content-Type": "application/json",
-    },
-  });
-  const json = (await res.json().catch(() => null)) as any;
-  if (!res.ok) {
-    throw new Error(json?.message || json?.error || "Falha ao consultar pagamento no Mercado Pago");
-  }
-  return json as any;
-}
-
 export const handleMercadoPagoWebhook: RequestHandler = async (req, res) => {
   try {
     if (!env.mpAccessToken) return res.status(200).json({ ok: true });
@@ -117,43 +105,14 @@ export const handleMercadoPagoWebhook: RequestHandler = async (req, res) => {
 
     const payment = await fetchMercadoPagoPayment(paymentId);
     const orderId = String(payment?.external_reference || "");
-    const status = String(payment?.status || "");
     if (!orderId) return res.status(200).json({ ok: true });
 
     const order = getOrderById(orderId);
     if (!order) return res.status(200).json({ ok: true });
-    const wasPaid = order.status === "paid" && !!order.paid_at;
-
-    // Basic integrity checks to avoid random webhook spam updating orders.
-    const paymentAmount = Number(payment?.transaction_amount);
-    if (Number.isFinite(paymentAmount)) {
-      const expected = order.total_cents / 100;
-      if (Math.abs(paymentAmount - expected) > 0.01) {
-        return res.status(200).json({ ok: true });
-      }
-    }
-
-    // Update status fields even if not approved (helpful for debugging).
-    setOrderPaymentStatus({ orderId, mpPaymentId: String(paymentId), mpPaymentStatus: status });
-
-    if (status === "approved" && !wasPaid) {
-      const approvedAt = payment?.date_approved || payment?.date_last_updated || new Date().toISOString();
-      const paidAtIso = new Date(approvedAt).toISOString();
-      markOrderPaid({
-        orderId,
-        mpPaymentId: String(paymentId),
-        mpPaymentStatus: status,
-        paidAtIso,
-      });
-
-      const orderPaid = {
-        ...order,
-        status: "paid",
-        paid_at: paidAtIso,
-        mp_payment_id: String(paymentId),
-        mp_payment_status: status,
-      };
-      void notifyN8nOrderPaid({ order: orderPaid, payment }).catch(() => {});
+    const result = await reconcileOrderPayment(order);
+    const paymentStatus = String(result.payment?.status || "");
+    if (paymentStatus !== "approved") {
+      scheduleOrderPaymentReconciliation(orderId);
     }
 
     return res.status(200).json({ ok: true });

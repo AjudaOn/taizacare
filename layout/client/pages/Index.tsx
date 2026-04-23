@@ -386,7 +386,13 @@ export default function Index() {
 
     const pollStatus = async () => {
       try {
-        const res = await fetch(`/api/order-status?orderId=${encodeURIComponent(pixPayment.orderId)}`);
+        const qs = new URLSearchParams({
+          orderId: pixPayment.orderId,
+          t: String(Date.now()),
+        });
+        const res = await fetch(`/api/order-status?${qs.toString()}`, {
+          cache: "no-store",
+        });
         const data = await res.json();
         if (!res.ok || !data?.ok) return;
         if (cancelled) return;
