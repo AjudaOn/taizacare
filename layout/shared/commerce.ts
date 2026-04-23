@@ -35,3 +35,16 @@ export type CheckoutErrorResponse = {
   ok: false;
   error: string;
 };
+
+export type OrderStatusResponse = {
+  ok: true;
+  orderId: string;
+  status: "pending_payment" | "paid" | "canceled";
+  paidAt: string | null;
+  paymentStatus: string | null;
+};
+
+export type OrderStatusErrorResponse = {
+  ok: false;
+  error: string;
+};

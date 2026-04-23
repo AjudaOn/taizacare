@@ -118,11 +118,13 @@ const SuccessState = ({ onBack }: { onBack: () => void }) => (
 const PixPaymentState = ({
   payment,
   copied,
+  confirming,
   onCopy,
   onBack,
 }: {
   payment: { orderId: string; paymentId: string; qrCode: string; qrCodeBase64?: string | null };
   copied: boolean;
+  confirming: boolean;
   onCopy: () => void;
   onBack: () => void;
 }) => (
@@ -137,6 +139,9 @@ const PixPaymentState = ({
         <p className="max-w-2xl text-sm leading-relaxed text-[#6c6c6c]">
           Escaneie o QR Code ou copie o codigo Pix abaixo. Assim que o pagamento for aprovado, o pedido sera confirmado
           automaticamente.
+        </p>
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#8b7f72]">
+          {confirming ? "Confirmando pagamento..." : "Aguardando pagamento..."}
         </p>
       </div>
 
@@ -233,6 +238,7 @@ export default function Index() {
     qrCodeBase64?: string | null;
   } | null>(null);
   const [pixCopied, setPixCopied] = useState(false);
+  const [pixConfirming, setPixConfirming] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState<1 | 2 | 3 | 4>(1);
   const [dayToDayFrame, setDayToDayFrame] = useState<1 | 2 | 3 | 4>(1);
 
@@ -368,6 +374,43 @@ export default function Index() {
     setPixCopied(true);
     window.setTimeout(() => setPixCopied(false), 2500);
   }
+
+  useEffect(() => {
+    if (!pixPayment?.orderId) {
+      setPixConfirming(false);
+      return;
+    }
+
+    let cancelled = false;
+    setPixConfirming(true);
+
+    const pollStatus = async () => {
+      try {
+        const res = await fetch(`/api/order-status?orderId=${encodeURIComponent(pixPayment.orderId)}`);
+        const data = await res.json();
+        if (!res.ok || !data?.ok) return;
+        if (cancelled) return;
+
+        if (data.status === "paid") {
+          setPixConfirming(false);
+          setPixPayment(null);
+          handlePurchase();
+        }
+      } catch {
+        // Keep polling silently while the customer is on the Pix screen.
+      }
+    };
+
+    void pollStatus();
+    const intervalId = window.setInterval(() => {
+      void pollStatus();
+    }, 4000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [pixPayment?.orderId]);
 
   useEffect(() => {
     if (deliveryMethod === "pickup") {
@@ -589,10 +632,14 @@ export default function Index() {
       <PixPaymentState
         payment={pixPayment}
         copied={pixCopied}
+        confirming={pixConfirming}
         onCopy={() => {
           void copyPixCode();
         }}
-        onBack={() => setPixPayment(null)}
+        onBack={() => {
+          setPixConfirming(false);
+          setPixPayment(null);
+        }}
       />
     );
   }
