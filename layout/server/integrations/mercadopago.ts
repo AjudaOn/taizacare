@@ -71,6 +71,7 @@ export async function createMercadoPagoPreference(params: {
             excluded_payment_methods: [{ id: "pix" }],
           },
     external_reference: params.orderId,
+    notification_url: `${baseUrl}/api/mp/webhook`,
     back_urls: {
       success: `${baseUrl}/?status=success&orderId=${params.orderId}`,
       failure: `${baseUrl}/?status=failure&orderId=${params.orderId}`,
