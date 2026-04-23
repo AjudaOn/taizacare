@@ -11,11 +11,20 @@ import {
   Info,
   ChevronRight,
   ArrowRight,
-  MessageCircle
+  MessageCircle,
+  Copy,
+  QrCode
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Sub-components moved outside to ensure stable component identity
 const FeatureItem = ({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) => (
@@ -113,6 +122,83 @@ const SuccessState = ({ onBack }: { onBack: () => void }) => (
   </div>
 );
 
+const PixDialog = ({
+  payment,
+  copied,
+  onCopy,
+  onOpenChange,
+}: {
+  payment: { orderId: string; paymentId: string; qrCode: string; qrCodeBase64?: string | null } | null;
+  copied: boolean;
+  onCopy: () => void;
+  onOpenChange: (open: boolean) => void;
+}) => (
+  <Dialog open={!!payment} onOpenChange={onOpenChange}>
+    <DialogContent className="max-w-xl rounded-[2rem] border border-[#d2c9be]/30 bg-white p-0 sm:rounded-[2rem]">
+      <div className="space-y-6 p-6 sm:p-8">
+        <DialogHeader className="space-y-3 text-left">
+          <DialogTitle className="font-brandSerif text-3xl text-[#3a3a3a]">Pague com Pix</DialogTitle>
+          <DialogDescription className="text-sm leading-relaxed text-[#6c6c6c]">
+            Use o QR Code abaixo ou copie o codigo Pix. Assim que o pagamento for aprovado, o pedido sera confirmado
+            automaticamente.
+          </DialogDescription>
+        </DialogHeader>
+
+        {payment && (
+          <>
+            <div className="grid gap-5 md:grid-cols-[220px_minmax(0,1fr)] md:items-start">
+              <div className="rounded-[1.75rem] border border-[#d2c9be]/30 bg-[#F9F7F5] p-4">
+                <div className="flex items-center gap-2 pb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#6c6c6c]">
+                  <QrCode className="h-4 w-4" />
+                  QR Code
+                </div>
+                {payment.qrCodeBase64 ? (
+                  <img
+                    src={`data:image/png;base64,${payment.qrCodeBase64}`}
+                    alt="QR Code Pix"
+                    className="mx-auto h-auto w-full max-w-[180px] rounded-2xl bg-white p-3"
+                  />
+                ) : (
+                  <div className="flex h-[180px] items-center justify-center rounded-2xl bg-white text-center text-sm text-[#6c6c6c]">
+                    QR Code indisponivel
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <div className="rounded-[1.75rem] border border-[#d2c9be]/30 bg-[#F9F7F5] p-4">
+                  <div className="pb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#6c6c6c]">
+                    Copia e cola
+                  </div>
+                  <div className="rounded-2xl bg-white p-4 font-mono text-xs leading-relaxed break-all text-[#3a3a3a]">
+                    {payment.qrCode}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <Button type="button" onClick={onCopy} className="h-12 rounded-full bg-[#3a3a3a] px-5 text-white hover:bg-black">
+                    <Copy className="mr-2 h-4 w-4" />
+                    {copied ? "Codigo copiado" : "Copiar codigo Pix"}
+                  </Button>
+                </div>
+
+                <div className="rounded-[1.5rem] border border-[#d2c9be]/30 bg-white px-4 py-3 text-sm text-[#6c6c6c]">
+                  <div>
+                    <span className="font-semibold text-[#3a3a3a]">Pedido:</span> {payment.orderId}
+                  </div>
+                  <div>
+                    <span className="font-semibold text-[#3a3a3a]">Pagamento:</span> {payment.paymentId}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </DialogContent>
+  </Dialog>
+);
+
 export default function Index() {
   const DAY_TO_DAY_FRAME_COUNT = 4;
   const DAY_TO_DAY_AUTO_ROTATE_MS = 4500;
@@ -146,6 +232,13 @@ export default function Index() {
   const [addressLookupError, setAddressLookupError] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"pix" | "card">("pix");
+  const [pixPayment, setPixPayment] = useState<{
+    orderId: string;
+    paymentId: string;
+    qrCode: string;
+    qrCodeBase64?: string | null;
+  } | null>(null);
+  const [pixCopied, setPixCopied] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState<1 | 2 | 3 | 4>(1);
   const [dayToDayFrame, setDayToDayFrame] = useState<1 | 2 | 3 | 4>(1);
 
@@ -274,6 +367,13 @@ export default function Index() {
 
   const formatBRL = (cents: number) =>
     (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  async function copyPixCode() {
+    if (!pixPayment?.qrCode) return;
+    await navigator.clipboard.writeText(pixPayment.qrCode);
+    setPixCopied(true);
+    window.setTimeout(() => setPixCopied(false), 2500);
+  }
 
   useEffect(() => {
     if (deliveryMethod === "pickup") {
@@ -434,6 +534,17 @@ export default function Index() {
         return;
       }
 
+      if (data.pix) {
+        setPixCopied(false);
+        setPixPayment({
+          orderId: data.orderId,
+          paymentId: data.pix.paymentId,
+          qrCode: data.pix.qrCode,
+          qrCodeBase64: data.pix.qrCodeBase64 ?? null,
+        });
+        return;
+      }
+
       handlePurchase();
     } catch (e: any) {
       alert(e?.message || "Erro");
@@ -481,6 +592,17 @@ export default function Index() {
 
       return (
     <div className="min-h-screen bg-brand-paper font-brandSans text-brand-ink selection:bg-brand-taupe/10 overflow-x-hidden">
+      <PixDialog
+        payment={pixPayment}
+        copied={pixCopied}
+        onCopy={() => {
+          void copyPixCode();
+        }}
+        onOpenChange={(open) => {
+          if (!open) setPixPayment(null);
+        }}
+      />
+
       {/* Dynamic Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-brand-charcoal">
         <div className="container px-6 mx-auto flex items-center justify-between py-4">

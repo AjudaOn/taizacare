@@ -22,7 +22,12 @@ export type ShippingQuoteErrorResponse = {
 export type CheckoutResponse = {
   ok: true;
   orderId: string;
-  initPoint: string;
+  initPoint?: string;
+  pix?: {
+    paymentId: string;
+    qrCode: string;
+    qrCodeBase64?: string | null;
+  };
   mock?: boolean;
 };
 
@@ -30,4 +35,3 @@ export type CheckoutErrorResponse = {
   ok: false;
   error: string;
 };
-

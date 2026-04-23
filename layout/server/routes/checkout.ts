@@ -1,8 +1,8 @@
 import { RequestHandler } from "express";
 import { checkoutInputSchema, env, pricing } from "../config";
 import { quoteShippingMelhorEnvio } from "../integrations/melhorenvio";
-import { createMercadoPagoPreference } from "../integrations/mercadopago";
-import { insertOrder, setOrderMercadoPago } from "../db";
+import { createMercadoPagoPixPayment, createMercadoPagoPreference } from "../integrations/mercadopago";
+import { insertOrder, setOrderMercadoPago, setOrderPaymentStatus } from "../db";
 import type { CheckoutErrorResponse, CheckoutResponse } from "@shared/commerce";
 import crypto from "crypto";
 
@@ -102,29 +102,61 @@ export const handleCheckout: RequestHandler = async (req, res) => {
       paid_at: null,
     });
 
-    const mp = await createMercadoPagoPreference({
-      orderId,
-      paymentMethod,
-      customerEmail: customer.email,
-      product: {
-        title: env.productName,
-        quantity: productQty,
-        unitPriceCents: productPriceCents,
-      },
-      shipping: {
-        title: shipping.method === "pickup" ? "Retirada no local" : `Frete - ${shippingServiceName}`,
-        unitPriceCents: shippingPriceCents,
-      },
-    });
-
-    setOrderMercadoPago(orderId, mp.preferenceId, mp.initPoint);
-
-    const response: CheckoutResponse = {
-      ok: true,
-      orderId,
-      initPoint: mp.initPoint,
-      ...(mp.mock ? { mock: true } : {}),
+    const productPayload = {
+      title: env.productName,
+      quantity: productQty,
+      unitPriceCents: productPriceCents,
     };
+    const shippingPayloadForMp = {
+      title: shipping.method === "pickup" ? "Retirada no local" : `Frete - ${shippingServiceName}`,
+      unitPriceCents: shippingPriceCents,
+    };
+
+    let response: CheckoutResponse;
+    if (paymentMethod === "pix") {
+      const mp = await createMercadoPagoPixPayment({
+        orderId,
+        customerEmail: customer.email,
+        customerName: customer.name,
+        customerCpf: customer.cpf,
+        product: productPayload,
+        shipping: shippingPayloadForMp,
+      });
+
+      setOrderPaymentStatus({
+        orderId,
+        mpPaymentId: mp.paymentId,
+        mpPaymentStatus: mp.status,
+      });
+
+      response = {
+        ok: true,
+        orderId,
+        pix: {
+          paymentId: mp.paymentId,
+          qrCode: mp.qrCode,
+          qrCodeBase64: mp.qrCodeBase64,
+        },
+        ...(mp.mock ? { mock: true } : {}),
+      };
+    } else {
+      const mp = await createMercadoPagoPreference({
+        orderId,
+        customerEmail: customer.email,
+        product: productPayload,
+        shipping: shippingPayloadForMp,
+      });
+
+      setOrderMercadoPago(orderId, mp.preferenceId, mp.initPoint);
+
+      response = {
+        ok: true,
+        orderId,
+        initPoint: mp.initPoint,
+        ...(mp.mock ? { mock: true } : {}),
+      };
+    }
+
     return res.status(200).json(response);
   } catch (error: any) {
     const response: CheckoutErrorResponse = { ok: false, error: error?.message || "Erro no checkout" };
