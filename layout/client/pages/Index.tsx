@@ -97,18 +97,15 @@ const SuccessState = ({ onBack }: { onBack: () => void }) => (
       </div>
       <h1 className="font-brandSerif text-4xl text-brand-charcoal mb-6">Pedido Realizado</h1>
       <p className="text-brand-ink mb-10 leading-relaxed font-light">
-        Sua jornada de recuperação começou. Enviamos os detalhes para o seu e-mail.
+        Sua jornada de recuperação começou. Qualquer dúvida entre em contato pelo nosso WhatsApp.
       </p>
-      <div className="space-y-4">
-        <Button className="w-full bg-brand-charcoal text-white h-16 rounded-2xl flex items-center justify-center gap-3 hover:bg-black transition-all">
-          Acompanhar Pedido
-        </Button>
+      <div>
         <Button 
           variant="ghost" 
           className="w-full text-brand-taupe font-medium" 
           onClick={onBack}
         >
-          Voltar ao início
+          Voltar ao site
         </Button>
       </div>
     </div>
