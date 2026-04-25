@@ -199,6 +199,13 @@ const PixPaymentState = ({
 );
 
 export default function Index() {
+  const sizeOptions = [
+    { sigla: "PP", num: "34" },
+    { sigla: "P", num: "36/38" },
+    { sigla: "M", num: "40/42" },
+    { sigla: "G", num: "44" },
+    { sigla: "GG", num: "46 em diante" },
+  ] as const;
   const DAY_TO_DAY_FRAME_COUNT = 4;
   const DAY_TO_DAY_AUTO_ROTATE_MS = 4500;
   const DAY_TO_DAY_AUTO_ROTATE_MOBILE_MS = 7000;
@@ -208,6 +215,9 @@ export default function Index() {
   const [isDayToDayInView, setIsDayToDayInView] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [stockBySize, setStockBySize] = useState<Record<string, number>>({});
+  const [stockLoading, setStockLoading] = useState(true);
+  const [stockError, setStockError] = useState<string | null>(null);
   const [checkoutForm, setCheckoutForm] = useState({
     name: "",
     email: "",
@@ -355,6 +365,7 @@ export default function Index() {
   const productPixPriceCents = 10990;
   const productCardPriceCents = 11990;
   const productPriceCents = paymentMethod === "pix" ? productPixPriceCents : productCardPriceCents;
+  const selectedSizeStock = selectedSize ? stockBySize[selectedSize] ?? 0 : null;
   const shippingPriceCents = useMemo(() => {
     if (deliveryMethod === "pickup") return 0;
     if (selectedShippingServiceId == null) return 0;
@@ -374,6 +385,49 @@ export default function Index() {
     setPixCopied(true);
     window.setTimeout(() => setPixCopied(false), 2500);
   }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadStock = async () => {
+      setStockLoading(true);
+      setStockError(null);
+      try {
+        const res = await fetch("/api/stock", { cache: "no-store" });
+        const data = await res.json();
+        if (!res.ok || !data?.ok) {
+          throw new Error(data?.error || "Não foi possível consultar o estoque");
+        }
+        if (cancelled) return;
+        const nextStock = Object.fromEntries(
+          (data.stock ?? []).map((item: { size: string; quantity: number }) => [
+            String(item.size).toUpperCase(),
+            Number(item.quantity ?? 0),
+          ]),
+        );
+        setStockBySize(nextStock);
+      } catch (error: any) {
+        if (cancelled) return;
+        setStockError(error?.message || "Não foi possível consultar o estoque");
+      } finally {
+        if (!cancelled) setStockLoading(false);
+      }
+    };
+
+    void loadStock();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedSize) return;
+    const available = stockBySize[selectedSize];
+    if (typeof available !== "number") return;
+    if (available > 0 && quantity > available) {
+      setQuantity(available);
+    }
+  }, [selectedSize, stockBySize, quantity]);
 
   useEffect(() => {
     if (!pixPayment?.orderId) {
@@ -515,6 +569,10 @@ export default function Index() {
     setCheckoutLoading(true);
     try {
       if (!selectedSize) throw new Error("Selecione um tamanho");
+      if ((stockBySize[selectedSize] ?? 0) <= 0) throw new Error(`Tamanho ${selectedSize} indisponível no momento`);
+      if (quantity > (stockBySize[selectedSize] ?? 0)) {
+        throw new Error(`Temos apenas ${stockBySize[selectedSize] ?? 0} unidade(s) no tamanho ${selectedSize}`);
+      }
       if (!checkoutForm.name.trim()) throw new Error("Informe seu nome");
       if (!checkoutForm.email.trim()) throw new Error("Informe seu e-mail");
       const cpfDigits = checkoutForm.cpf.replace(/\D/g, "");
@@ -598,6 +656,12 @@ export default function Index() {
 
   function validateStep(step: 1 | 2 | 3 | 4): string | null {
     if (step === 1 && !selectedSize) return "Selecione um tamanho para continuar";
+    if (step === 1 && selectedSize && (stockBySize[selectedSize] ?? 0) <= 0) {
+      return `Tamanho ${selectedSize} indisponível no momento`;
+    }
+    if (step === 1 && selectedSize && quantity > (stockBySize[selectedSize] ?? 0)) {
+      return `Temos apenas ${stockBySize[selectedSize] ?? 0} unidade(s) no tamanho ${selectedSize}`;
+    }
     if (step === 3) {
       if (!checkoutForm.name.trim()) return "Informe seu nome";
       if (!checkoutForm.email.trim()) return "Informe seu e-mail";
@@ -1350,27 +1414,40 @@ export default function Index() {
                       utilizava antes da gestação, para garantir maior conforto conforme houver aumento do abdome.
                     </p>
                     <div className="grid grid-cols-5 gap-3">
-                      {[
-                        { sigla: "PP", num: "34" },
-                        { sigla: "P", num: "36/38" },
-                        { sigla: "M", num: "40/42" },
-                        { sigla: "G", num: "44" },
-                        { sigla: "GG", num: "46 em diante" },
-                      ].map(({ sigla, num }) => (
+                      {sizeOptions.map(({ sigla, num }) => {
+                        const available = stockBySize[sigla] ?? 0;
+                        const soldOut = !stockLoading && available <= 0;
+                        return (
                         <button
                           key={`step-${sigla}`}
+                          type="button"
                           onClick={() => setSelectedSize(sigla)}
+                          disabled={soldOut}
                           className={`h-16 rounded-2xl border-2 transition-all flex flex-col items-center justify-center leading-tight ${
                             selectedSize === sigla
                               ? "border-[#3a3a3a] bg-[#3a3a3a] text-white"
-                              : "border-[#d2c9be]/30 bg-white hover:border-[#afa498] text-[#3a3a3a]"
+                              : soldOut
+                                ? "border-[#e8e0d7] bg-[#f5f1ec] text-[#b3b2b2] cursor-not-allowed"
+                                : "border-[#d2c9be]/30 bg-white hover:border-[#afa498] text-[#3a3a3a]"
                           }`}
                         >
                           <span>{sigla}</span>
-                          <span className="text-[11px] opacity-80">{num}</span>
+                          <span className="text-[11px] opacity-80">
+                            {soldOut ? "Sem estoque" : num}
+                          </span>
                         </button>
-                      ))}
+                      )})}
                     </div>
+                    {stockError ? (
+                      <p className="text-xs text-red-600">{stockError}</p>
+                    ) : selectedSize && selectedSizeStock != null ? (
+                      <p className="text-xs text-[#6c6c6c]">
+                        Estoque disponível no tamanho <span className="font-semibold text-[#3a3a3a]">{selectedSize}</span>:{" "}
+                        <span className="font-semibold text-[#3a3a3a]">{selectedSizeStock}</span>
+                      </p>
+                    ) : stockLoading ? (
+                      <p className="text-xs text-[#6c6c6c]">Consultando estoque...</p>
+                    ) : null}
                    
                     <div className="flex items-center justify-between rounded-2xl border border-[#d2c9be]/30 bg-[#F9F7F5] p-4">
                       <div className="text-sm text-[#3a3a3a]">Quantidade</div>
@@ -1386,7 +1463,12 @@ export default function Index() {
                         <div className="min-w-8 text-center text-base font-medium text-[#3a3a3a]">{quantity}</div>
                         <button
                           type="button"
-                          onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+                          onClick={() =>
+                            setQuantity((q) =>
+                              Math.min(selectedSizeStock != null && selectedSizeStock > 0 ? selectedSizeStock : 10, q + 1),
+                            )
+                          }
+                          disabled={selectedSizeStock != null && selectedSizeStock <= quantity}
                           className="h-9 w-9 rounded-full border border-[#d2c9be]/40 bg-white text-[#3a3a3a]"
                           aria-label="Aumentar quantidade"
                         >

@@ -37,6 +37,7 @@ export async function notifyN8nOrderPaid(params: PaidNotifyInput) {
       product: {
         sku: params.order.product_sku,
         name: params.order.product_name,
+        size: params.order.product_size,
         qty: params.order.product_qty,
         price_cents: params.order.product_price_cents,
       },

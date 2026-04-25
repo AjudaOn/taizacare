@@ -21,6 +21,7 @@ export type OrderRow = {
   shipping_price_cents: number;
   product_sku: string;
   product_name: string;
+  product_size: string | null;
   product_qty: number;
   product_price_cents: number;
   total_cents: number;
@@ -80,6 +81,7 @@ export function getDb() {
       shipping_price_cents INTEGER NOT NULL,
       product_sku TEXT NOT NULL,
       product_name TEXT NOT NULL,
+      product_size TEXT,
       product_qty INTEGER NOT NULL,
       product_price_cents INTEGER NOT NULL,
       total_cents INTEGER NOT NULL,
@@ -110,6 +112,7 @@ export function getDb() {
   ensureColumn(db, "orders", "mp_payment_id", "TEXT");
   ensureColumn(db, "orders", "mp_payment_status", "TEXT");
   ensureColumn(db, "orders", "paid_at", "TEXT");
+  ensureColumn(db, "orders", "product_size", "TEXT");
 
   dbSingleton = db;
   return dbSingleton;
@@ -125,7 +128,7 @@ export function insertOrder(row: Omit<OrderRow, "created_at" | "updated_at">) {
       customer_name, customer_email, customer_cpf, customer_phone,
       shipping_to_postal_code, shipping_address_json,
       shipping_service_id, shipping_service_name, shipping_price_cents,
-      product_sku, product_name, product_qty, product_price_cents,
+      product_sku, product_name, product_size, product_qty, product_price_cents,
       total_cents,
       mp_preference_id, mp_init_point,
       created_at, updated_at
@@ -135,7 +138,7 @@ export function insertOrder(row: Omit<OrderRow, "created_at" | "updated_at">) {
       @customer_name, @customer_email, @customer_cpf, @customer_phone,
       @shipping_to_postal_code, @shipping_address_json,
       @shipping_service_id, @shipping_service_name, @shipping_price_cents,
-      @product_sku, @product_name, @product_qty, @product_price_cents,
+      @product_sku, @product_name, @product_size, @product_qty, @product_price_cents,
       @total_cents,
       @mp_preference_id, @mp_init_point,
       @created_at, @updated_at
@@ -222,6 +225,12 @@ export function listStockLevels() {
     ELSE 99
   END`);
   return stmt.all() as StockRow[];
+}
+
+export function getStockLevel(size: StockSize) {
+  const db = getDb();
+  const stmt = db.prepare(`SELECT size, quantity, updated_at FROM stock_levels WHERE size = ?`);
+  return stmt.get(size) as StockRow | undefined;
 }
 
 export function setStockLevels(updates: Partial<Record<StockSize, number>>) {

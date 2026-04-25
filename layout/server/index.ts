@@ -10,6 +10,7 @@ import { handleOrderStatus } from "./routes/order-status";
 import { handleAdminOrders } from "./routes/admin-orders";
 import { handleAdminN8nTestPaid } from "./routes/admin-n8n-test";
 import { handleAdminStockGet, handleAdminStockUpdate } from "./routes/admin-stock";
+import { handlePublicStockGet } from "./routes/public-stock";
 
 export function createServer() {
   const app = express();
@@ -30,6 +31,7 @@ export function createServer() {
   app.get("/api/demo", handleDemo);
   app.post("/api/shipping/quote", handleShippingQuote);
   app.get("/api/address/lookup", handleAddressLookup);
+  app.get("/api/stock", handlePublicStockGet);
   app.post("/api/checkout", handleCheckout);
   app.get("/api/order-status", handleOrderStatus);
   app.post("/api/mp/webhook", handleMercadoPagoWebhook);

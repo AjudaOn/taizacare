@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { checkoutInputSchema, env, pricing } from "../config";
 import { quoteShippingMelhorEnvio } from "../integrations/melhorenvio";
 import { createMercadoPagoPixPayment, createMercadoPagoPreference } from "../integrations/mercadopago";
-import { insertOrder, setOrderMercadoPago, setOrderPaymentStatus } from "../db";
+import { getStockLevel, insertOrder, setOrderMercadoPago, setOrderPaymentStatus, type StockSize } from "../db";
 import type { CheckoutErrorResponse, CheckoutResponse } from "@shared/commerce";
 import crypto from "crypto";
 
@@ -22,6 +22,25 @@ export const handleCheckout: RequestHandler = async (req, res) => {
     const orderId = crypto.randomUUID();
     const { customer, shipping, paymentMethod } = parsed.data;
     const productQty = parsed.data.product?.qty ?? 1;
+    const productSize = parsed.data.product?.size?.trim().toUpperCase() || null;
+    if (!productSize) {
+      const response: CheckoutErrorResponse = { ok: false, error: "Selecione um tamanho" };
+      return res.status(400).json(response);
+    }
+
+    const stock = getStockLevel(productSize as StockSize);
+    const availableStock = stock?.quantity ?? 0;
+    if (availableStock <= 0) {
+      const response: CheckoutErrorResponse = { ok: false, error: `Tamanho ${productSize} indisponível no momento` };
+      return res.status(400).json(response);
+    }
+    if (productQty > availableStock) {
+      const response: CheckoutErrorResponse = {
+        ok: false,
+        error: `Temos apenas ${availableStock} unidade(s) no tamanho ${productSize}`,
+      };
+      return res.status(400).json(response);
+    }
     let shippingServiceId = "pickup";
     let shippingServiceName = "Retirada no local";
     let shippingPriceCents = 0;
@@ -92,6 +111,7 @@ export const handleCheckout: RequestHandler = async (req, res) => {
       shipping_price_cents: shippingPriceCents,
       product_sku: env.productSku,
       product_name: env.productName,
+      product_size: productSize,
       product_qty: productQty,
       product_price_cents: productPriceCents,
       total_cents: totalCents,
