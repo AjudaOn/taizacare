@@ -4,7 +4,7 @@ import { getOrderById } from "../db";
 import crypto from "crypto";
 import {
   fetchMercadoPagoPayment,
-  reconcileOrderPayment,
+  applyPaymentToOrder,
   scheduleOrderPaymentReconciliation,
 } from "../integrations/mercadopago-reconcile";
 function extractPaymentIdFromBody(body: any): string | null {
@@ -109,7 +109,7 @@ export const handleMercadoPagoWebhook: RequestHandler = async (req, res) => {
 
     const order = getOrderById(orderId);
     if (!order) return res.status(200).json({ ok: true });
-    const result = await reconcileOrderPayment(order);
+    const result = await applyPaymentToOrder(order, payment);
     const paymentStatus = String(result.payment?.status || "");
     if (paymentStatus !== "approved") {
       scheduleOrderPaymentReconciliation(orderId);

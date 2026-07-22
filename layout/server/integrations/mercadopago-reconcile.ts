@@ -29,7 +29,7 @@ export async function fetchMercadoPagoPayment(paymentId: string) {
   return json;
 }
 
-async function applyPaymentToOrder(order: OrderRow, payment: MercadoPagoPayment) {
+export async function applyPaymentToOrder(order: OrderRow, payment: MercadoPagoPayment) {
   const paymentId = payment?.id ? String(payment.id) : order.mp_payment_id;
   const status = payment?.status ? String(payment.status) : "";
 
