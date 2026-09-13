@@ -174,8 +174,10 @@ export async function quoteShippingMelhorEnvio(params: {
     throw new Error(`Melhor Envio error (${res.status}): ${text || res.statusText}`);
   }
 
-  const data = (await res.json()) as MelhorEnvioServiceQuote[] | Record<string, unknown>;
-  const list = Array.isArray(data) ? data : [];
+  const data = (await res.json()) as MelhorEnvioServiceQuote[] | MelhorEnvioServiceQuote;
+  // When exactly one service is requested, Melhor Envio returns a bare object
+  // instead of a single-item array.
+  const list = Array.isArray(data) ? data : data && typeof data === "object" ? [data] : [];
 
   const errored = list.filter((s) => s.error);
   if (errored.length) {
