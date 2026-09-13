@@ -155,7 +155,7 @@ export async function quoteShippingMelhorEnvio(params: {
       receipt: false,
       own_hand: false,
     },
-    services: params.serviceIds?.length ? params.serviceIds : undefined,
+    services: params.serviceIds?.length ? params.serviceIds.join(",") : undefined,
   };
 
   const res = await fetch(url.toString(), {
@@ -176,6 +176,14 @@ export async function quoteShippingMelhorEnvio(params: {
 
   const data = (await res.json()) as MelhorEnvioServiceQuote[] | Record<string, unknown>;
   const list = Array.isArray(data) ? data : [];
+
+  const errored = list.filter((s) => s.error);
+  if (errored.length) {
+    console.error(
+      "Melhor Envio quote returned service errors:",
+      JSON.stringify(errored.map((s) => ({ id: s.id, name: s.name, error: s.error }))),
+    );
+  }
 
   const options = list
     .filter((s) => !s.error)
