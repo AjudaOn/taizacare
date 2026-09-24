@@ -48,3 +48,12 @@ export type OrderStatusErrorResponse = {
   ok: false;
   error: string;
 };
+
+export type OrderItem = {
+  size: string;
+  qty: number;
+};
+
+export function formatOrderItems(items: OrderItem[]) {
+  return items.map((item) => `${item.qty}x ${item.size}`).join(", ");
+}

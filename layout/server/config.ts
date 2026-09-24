@@ -97,6 +97,16 @@ export const checkoutInputSchema = z.object({
     .object({
       qty: z.number().int().min(1).max(10).default(1),
       size: z.string().optional(),
+      items: z
+        .array(
+          z.object({
+            size: z.string().min(1),
+            qty: z.number().int().min(1).max(10),
+          }),
+        )
+        .min(1)
+        .max(5)
+        .optional(),
     })
     .optional(),
 });

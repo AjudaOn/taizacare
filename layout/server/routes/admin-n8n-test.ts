@@ -41,6 +41,8 @@ export const handleAdminN8nTestPaid: RequestHandler = async (req, res) => {
     total_cents: totalCents,
     product_sku: body.product_sku ?? env.productSku,
     product_name: body.product_name ?? env.productName,
+    product_size: body.product_size ?? "P",
+    product_items: Array.isArray(body.product_items) ? JSON.stringify(body.product_items) : null,
     product_qty: Number(body.product_qty ?? 1),
     product_price_cents: Number(body.product_price_cents ?? env.productPixPriceCents),
     shipping_to_postal_code: String(body.shipping_to_postal_code ?? "00000000"),

@@ -14,6 +14,7 @@ type OrderRow = {
   shipping_service_name: string;
   shipping_price_cents: number;
   product_name: string;
+  product_size: string | null;
   product_qty: number;
   product_price_cents: number;
   total_cents: number;
@@ -161,7 +162,8 @@ export default function Admin() {
                         <span className="text-xs text-brand-gray">#{o.id}</span>
                       </div>
                       <div className="mt-3 text-base font-medium text-brand-charcoal">
-                        {o.product_name} • {o.product_qty}x • {o.payment_method.toUpperCase()}
+                        {o.product_name} • {o.product_qty}x{o.product_size ? ` (${o.product_size})` : ""} •{" "}
+                        {o.payment_method.toUpperCase()}
                       </div>
                       <div className="mt-1 text-sm text-brand-gray">{o.customer_name}</div>
                       <div className="mt-1 text-sm text-brand-gray">

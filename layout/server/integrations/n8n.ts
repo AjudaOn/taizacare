@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { env } from "../config";
+import { formatOrderItems, type OrderItem } from "../../shared/commerce";
 
 function safeJsonParse<T>(text: string): T | null {
   try {
@@ -14,6 +15,14 @@ function signTemplate(params: { secret: string; template: string }) {
   return `sha256=${hex}`;
 }
 
+function orderItems(order: any): OrderItem[] {
+  const parsed = typeof order?.product_items === "string" ? safeJsonParse<OrderItem[]>(order.product_items) : null;
+  if (Array.isArray(parsed) && parsed.length) return parsed;
+  // Orders created before multi-size support only have product_size + product_qty.
+  if (order?.product_size) return [{ size: String(order.product_size), qty: Number(order.product_qty ?? 1) }];
+  return [];
+}
+
 export type PaidNotifyInput = {
   order: any;
   payment: any;
@@ -26,6 +35,7 @@ export async function notifyN8nOrderPaid(params: PaidNotifyInput) {
     typeof params.order?.shipping_address_json === "string"
       ? safeJsonParse<any>(params.order.shipping_address_json)
       : params.order?.shipping?.address ?? null;
+  const items = orderItems(params.order);
 
   const payload = {
     event: "order.paid",
@@ -40,6 +50,13 @@ export async function notifyN8nOrderPaid(params: PaidNotifyInput) {
         size: params.order.product_size,
         qty: params.order.product_qty,
         price_cents: params.order.product_price_cents,
+        summary: formatOrderItems(items),
+        items: items.map((item) => ({
+          size: item.size,
+          qty: item.qty,
+          price_cents: params.order.product_price_cents,
+          subtotal_cents: item.qty * params.order.product_price_cents,
+        })),
       },
       shipping: {
         to_postal_code: params.order.shipping_to_postal_code,

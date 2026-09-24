@@ -2,8 +2,16 @@ import { RequestHandler } from "express";
 import { checkoutInputSchema, env, pricing } from "../config";
 import { quoteShippingMelhorEnvio } from "../integrations/melhorenvio";
 import { createMercadoPagoPixPayment, createMercadoPagoPreference } from "../integrations/mercadopago";
-import { getStockLevel, insertOrder, setOrderMercadoPago, setOrderPaymentStatus, type StockSize } from "../db";
+import {
+  STOCK_SIZES,
+  getStockLevel,
+  insertOrder,
+  setOrderMercadoPago,
+  setOrderPaymentStatus,
+  type StockSize,
+} from "../db";
 import type { CheckoutErrorResponse, CheckoutResponse } from "@shared/commerce";
+import { formatOrderItems, type OrderItem } from "../../shared/commerce";
 import crypto from "crypto";
 
 function isPacOrSedex(serviceName: string) {
@@ -21,26 +29,52 @@ export const handleCheckout: RequestHandler = async (req, res) => {
 
     const orderId = crypto.randomUUID();
     const { customer, shipping, paymentMethod } = parsed.data;
-    const productQty = parsed.data.product?.qty ?? 1;
-    const productSize = parsed.data.product?.size?.trim().toUpperCase() || null;
-    if (!productSize) {
+    const product = parsed.data.product;
+    const rawItems = product?.items ?? (product?.size ? [{ size: product.size, qty: product.qty }] : []);
+
+    // Merge repeated sizes and keep the PP..GG order so summaries read consistently.
+    const qtyBySize = new Map<StockSize, number>();
+    for (const item of rawItems) {
+      const size = item.size.trim().toUpperCase() as StockSize;
+      if (!STOCK_SIZES.includes(size)) {
+        const response: CheckoutErrorResponse = { ok: false, error: `Tamanho ${size} inválido` };
+        return res.status(400).json(response);
+      }
+      qtyBySize.set(size, (qtyBySize.get(size) ?? 0) + item.qty);
+    }
+    const productItems: OrderItem[] = STOCK_SIZES.filter((size) => qtyBySize.has(size)).map((size) => ({
+      size,
+      qty: qtyBySize.get(size)!,
+    }));
+
+    if (!productItems.length) {
       const response: CheckoutErrorResponse = { ok: false, error: "Selecione um tamanho" };
       return res.status(400).json(response);
     }
 
-    const stock = getStockLevel(productSize as StockSize);
-    const availableStock = stock?.quantity ?? 0;
-    if (availableStock <= 0) {
-      const response: CheckoutErrorResponse = { ok: false, error: `Tamanho ${productSize} indisponível no momento` };
+    const productQty = productItems.reduce((sum, item) => sum + item.qty, 0);
+    if (productQty > 10) {
+      const response: CheckoutErrorResponse = { ok: false, error: "Limite de 10 peças por pedido" };
       return res.status(400).json(response);
     }
-    if (productQty > availableStock) {
-      const response: CheckoutErrorResponse = {
-        ok: false,
-        error: `Temos apenas ${availableStock} unidade(s) no tamanho ${productSize}`,
-      };
-      return res.status(400).json(response);
+
+    for (const item of productItems) {
+      const availableStock = getStockLevel(item.size as StockSize)?.quantity ?? 0;
+      if (availableStock <= 0) {
+        const response: CheckoutErrorResponse = { ok: false, error: `Tamanho ${item.size} indisponível no momento` };
+        return res.status(400).json(response);
+      }
+      if (item.qty > availableStock) {
+        const response: CheckoutErrorResponse = {
+          ok: false,
+          error: `Temos apenas ${availableStock} unidade(s) no tamanho ${item.size}`,
+        };
+        return res.status(400).json(response);
+      }
     }
+
+    // Single-size orders keep the plain size ("P"); mixed orders get a readable summary ("1x PP, 1x G").
+    const productSize = productItems.length === 1 ? productItems[0].size : formatOrderItems(productItems);
     let shippingServiceId = "pickup";
     let shippingServiceName = "Retirada no local";
     let shippingPriceCents = 0;
@@ -112,6 +146,7 @@ export const handleCheckout: RequestHandler = async (req, res) => {
       product_sku: env.productSku,
       product_name: env.productName,
       product_size: productSize,
+      product_items: JSON.stringify(productItems),
       product_qty: productQty,
       product_price_cents: productPriceCents,
       total_cents: totalCents,

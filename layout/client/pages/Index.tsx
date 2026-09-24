@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { formatOrderItems, type OrderItem } from "@shared/commerce";
 
 // Sub-components moved outside to ensure stable component identity
 const FeatureItem = ({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) => (
@@ -210,8 +211,7 @@ export default function Index() {
   const dayToDaySectionRef = useRef<HTMLElement>(null);
   const [isPurchased, setIsPurchased] = useState(false);
   const [isDayToDayInView, setIsDayToDayInView] = useState(false);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [quantity, setQuantity] = useState(1);
+  const [qtyBySize, setQtyBySize] = useState<Record<string, number>>({});
   const [stockBySize, setStockBySize] = useState<Record<string, number>>({});
   const [stockLoading, setStockLoading] = useState(true);
   const [stockError, setStockError] = useState<string | null>(null);
@@ -362,7 +362,15 @@ export default function Index() {
   const productPixPriceCents = 10990;
   const productCardPriceCents = 11990;
   const productPriceCents = paymentMethod === "pix" ? productPixPriceCents : productCardPriceCents;
-  const selectedSizeStock = selectedSize ? stockBySize[selectedSize] ?? 0 : null;
+  const MAX_ORDER_QTY = 10;
+  const selectedItems: OrderItem[] = sizeOptions
+    .filter(({ sigla }) => (qtyBySize[sigla] ?? 0) > 0)
+    .map(({ sigla }) => ({ size: sigla, qty: qtyBySize[sigla] }));
+  const quantity = selectedItems.reduce((sum, item) => sum + item.qty, 0);
+
+  const changeSizeQty = (size: string, delta: number) => {
+    setQtyBySize((prev) => ({ ...prev, [size]: Math.max(0, (prev[size] ?? 0) + delta) }));
+  };
   const shippingPriceCents = useMemo(() => {
     if (deliveryMethod === "pickup") return 0;
     if (selectedShippingServiceId == null) return 0;
@@ -418,13 +426,30 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-    if (!selectedSize) return;
-    const available = stockBySize[selectedSize];
-    if (typeof available !== "number") return;
-    if (available > 0 && quantity > available) {
-      setQuantity(available);
+    setQtyBySize((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const [size, qty] of Object.entries(prev)) {
+        const available = stockBySize[size];
+        if (typeof available === "number" && qty > available) {
+          next[size] = Math.max(0, available);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [stockBySize]);
+
+  function validateItems(): string | null {
+    if (!selectedItems.length) return "Escolha pelo menos uma peça para continuar";
+    if (quantity > MAX_ORDER_QTY) return `Limite de ${MAX_ORDER_QTY} peças por pedido`;
+    for (const item of selectedItems) {
+      const available = stockBySize[item.size] ?? 0;
+      if (available <= 0) return `Tamanho ${item.size} indisponível no momento`;
+      if (item.qty > available) return `Temos apenas ${available} unidade(s) no tamanho ${item.size}`;
     }
-  }, [selectedSize, stockBySize, quantity]);
+    return null;
+  }
 
   useEffect(() => {
     if (!pixPayment?.orderId) {
@@ -491,7 +516,7 @@ export default function Index() {
         const res = await fetch("/api/shipping/quote", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ toPostalCode: cep, quantity }),
+          body: JSON.stringify({ toPostalCode: cep, quantity: Math.max(1, quantity) }),
         });
         const data = await res.json();
         if (!res.ok || !data?.ok) {
@@ -565,11 +590,8 @@ export default function Index() {
   async function handleCheckout() {
     setCheckoutLoading(true);
     try {
-      if (!selectedSize) throw new Error("Selecione um tamanho");
-      if ((stockBySize[selectedSize] ?? 0) <= 0) throw new Error(`Tamanho ${selectedSize} indisponível no momento`);
-      if (quantity > (stockBySize[selectedSize] ?? 0)) {
-        throw new Error(`Temos apenas ${stockBySize[selectedSize] ?? 0} unidade(s) no tamanho ${selectedSize}`);
-      }
+      const itemsError = validateItems();
+      if (itemsError) throw new Error(itemsError);
       if (!checkoutForm.name.trim()) throw new Error("Informe seu nome");
       if (!checkoutForm.email.trim()) throw new Error("Informe seu e-mail");
       const cpfDigits = checkoutForm.cpf.replace(/\D/g, "");
@@ -617,7 +639,7 @@ export default function Index() {
           shipping: shippingPayload,
           product: {
             qty: quantity,
-            size: selectedSize,
+            items: selectedItems,
           },
         }),
       });
@@ -652,12 +674,9 @@ export default function Index() {
   }
 
   function validateStep(step: 1 | 2 | 3 | 4): string | null {
-    if (step === 1 && !selectedSize) return "Selecione um tamanho para continuar";
-    if (step === 1 && selectedSize && (stockBySize[selectedSize] ?? 0) <= 0) {
-      return `Tamanho ${selectedSize} indisponível no momento`;
-    }
-    if (step === 1 && selectedSize && quantity > (stockBySize[selectedSize] ?? 0)) {
-      return `Temos apenas ${stockBySize[selectedSize] ?? 0} unidade(s) no tamanho ${selectedSize}`;
+    if (step === 1) {
+      const itemsError = validateItems();
+      if (itemsError) return itemsError;
     }
     if (step === 3) {
       if (!checkoutForm.name.trim()) return "Informe seu nome";
@@ -1410,69 +1429,83 @@ export default function Index() {
                       <span className="font-medium text-[#3a3a3a]">Para a gestação:</span> Invista em um tamanho maior do que
                       utilizava antes da gestação, para garantir maior conforto conforme houver aumento do abdome.
                     </p>
-                    <div className="grid grid-cols-5 gap-3">
+                    <div className="space-y-2">
                       {sizeOptions.map(({ sigla, num }) => {
                         const available = stockBySize[sigla] ?? 0;
                         const soldOut = !stockLoading && available <= 0;
+                        const qty = qtyBySize[sigla] ?? 0;
+                        const canAdd = !stockLoading && qty < available && quantity < MAX_ORDER_QTY;
                         return (
-                        <button
-                          key={`step-${sigla}`}
-                          type="button"
-                          onClick={() => setSelectedSize(sigla)}
-                          disabled={soldOut}
-                          className={`h-16 rounded-2xl border-2 transition-all flex flex-col items-center justify-center leading-tight ${
-                            selectedSize === sigla
-                              ? "border-[#3a3a3a] bg-[#3a3a3a] text-white"
-                              : soldOut
-                                ? "border-[#e8e0d7] bg-[#f5f1ec] text-[#b3b2b2] cursor-not-allowed"
-                                : "border-[#d2c9be]/30 bg-white hover:border-[#afa498] text-[#3a3a3a]"
-                          }`}
-                        >
-                          <span>{sigla}</span>
-                          <span className="text-[11px] opacity-80">
-                            {soldOut ? "Sem estoque" : num}
-                          </span>
-                        </button>
-                      )})}
+                          <div
+                            key={`step-${sigla}`}
+                            className={`flex items-center justify-between gap-3 rounded-2xl border-2 px-4 py-3 transition-all ${
+                              qty > 0
+                                ? "border-[#3a3a3a] bg-white"
+                                : soldOut
+                                  ? "border-[#e8e0d7] bg-[#f5f1ec]"
+                                  : "border-[#d2c9be]/30 bg-white"
+                            }`}
+                          >
+                            <div className="flex min-w-0 items-center gap-3">
+                              <span
+                                className={`w-7 text-base font-medium ${soldOut ? "text-[#b3b2b2]" : "text-[#3a3a3a]"}`}
+                              >
+                                {sigla}
+                              </span>
+                              <div className="min-w-0 leading-tight">
+                                <div className="text-xs text-[#6c6c6c]">{num}</div>
+                                <div className="mt-0.5 text-[11px] text-[#6c6c6c]">
+                                  {stockLoading ? (
+                                    "Consultando estoque..."
+                                  ) : soldOut ? (
+                                    "Sem estoque"
+                                  ) : (
+                                    <>
+                                      Estoque: <span className="font-semibold text-[#3a3a3a]">{available}</span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={() => changeSizeQty(sigla, -1)}
+                                disabled={qty === 0}
+                                className="h-9 w-9 rounded-full border border-[#d2c9be]/40 bg-white text-[#3a3a3a] disabled:cursor-not-allowed disabled:opacity-40"
+                                aria-label={`Diminuir quantidade do tamanho ${sigla}`}
+                              >
+                                −
+                              </button>
+                              <div className="min-w-6 text-center text-base font-medium text-[#3a3a3a]">{qty}</div>
+                              <button
+                                type="button"
+                                onClick={() => changeSizeQty(sigla, 1)}
+                                disabled={!canAdd}
+                                className="h-9 w-9 rounded-full border border-[#d2c9be]/40 bg-white text-[#3a3a3a] disabled:cursor-not-allowed disabled:opacity-40"
+                                aria-label={`Aumentar quantidade do tamanho ${sigla}`}
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                     {stockError ? (
                       <p className="text-xs text-red-600">{stockError}</p>
-                    ) : selectedSize && selectedSizeStock != null ? (
-                      <p className="text-xs text-[#6c6c6c]">
-                        Estoque disponível no tamanho <span className="font-semibold text-[#3a3a3a]">{selectedSize}</span>:{" "}
-                        <span className="font-semibold text-[#3a3a3a]">{selectedSizeStock}</span>
-                      </p>
                     ) : stockLoading ? (
                       <p className="text-xs text-[#6c6c6c]">Consultando estoque...</p>
-                    ) : null}
-                   
-                    <div className="flex items-center justify-between rounded-2xl border border-[#d2c9be]/30 bg-[#F9F7F5] p-4">
-                      <div className="text-sm text-[#3a3a3a]">Quantidade</div>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                          className="h-9 w-9 rounded-full border border-[#d2c9be]/40 bg-white text-[#3a3a3a]"
-                          aria-label="Diminuir quantidade"
-                        >
-                          −
-                        </button>
-                        <div className="min-w-8 text-center text-base font-medium text-[#3a3a3a]">{quantity}</div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setQuantity((q) =>
-                              Math.min(selectedSizeStock != null && selectedSizeStock > 0 ? selectedSizeStock : 10, q + 1),
-                            )
-                          }
-                          disabled={selectedSizeStock != null && selectedSizeStock <= quantity}
-                          className="h-9 w-9 rounded-full border border-[#d2c9be]/40 bg-white text-[#3a3a3a]"
-                          aria-label="Aumentar quantidade"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
+                    ) : quantity > 0 ? (
+                      <p className="text-xs text-[#6c6c6c]">
+                        Seu pedido: <span className="font-semibold text-[#3a3a3a]">{formatOrderItems(selectedItems)}</span>
+                        {quantity >= MAX_ORDER_QTY ? ` · limite de ${MAX_ORDER_QTY} peças por pedido` : ""}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-[#6c6c6c]">
+                        Escolha a quantidade em cada tamanho. Você pode combinar tamanhos diferentes.
+                      </p>
+                    )}
                   </div>
                 )}
 
