@@ -6,6 +6,7 @@ import {
   fetchMercadoPagoPayment,
   applyPaymentToOrder,
   scheduleOrderPaymentReconciliation,
+  schedulePaymentReconciliation,
 } from "../integrations/mercadopago-reconcile";
 function extractPaymentIdFromBody(body: any): string | null {
   if (!body || typeof body !== "object") return null;
@@ -84,6 +85,7 @@ function verifyWebhookSignature(params: {
 }
 
 export const handleMercadoPagoWebhook: RequestHandler = async (req, res) => {
+  let paymentId: string | null = null;
   try {
     if (!env.mpAccessToken) return res.status(200).json({ ok: true });
 
@@ -100,7 +102,7 @@ export const handleMercadoPagoWebhook: RequestHandler = async (req, res) => {
       if (!verified.ok) return res.status(401).json({ ok: false });
     }
 
-    const paymentId = extractPaymentIdFromBody(req.body) ?? extractPaymentIdFromQuery(req.query);
+    paymentId = extractPaymentIdFromBody(req.body) ?? extractPaymentIdFromQuery(req.query);
     if (!paymentId) return res.status(200).json({ ok: true });
 
     const payment = await fetchMercadoPagoPayment(paymentId);
@@ -114,10 +116,15 @@ export const handleMercadoPagoWebhook: RequestHandler = async (req, res) => {
     if (paymentStatus !== "approved") {
       scheduleOrderPaymentReconciliation(orderId);
     }
+    if (!result.updated && result.order.status !== "paid") {
+      schedulePaymentReconciliation(paymentId);
+    }
 
     return res.status(200).json({ ok: true });
-  } catch {
-    // Always 200 so MP doesn't keep retrying forever while we debug.
+  } catch (error) {
+    console.error(`[mp] webhook for payment ${paymentId ?? "?"} failed`, error);
+    // Retry on our side instead: still 200 so MP doesn't keep retrying forever.
+    if (paymentId) schedulePaymentReconciliation(paymentId);
     return res.status(200).json({ ok: true });
   }
 };

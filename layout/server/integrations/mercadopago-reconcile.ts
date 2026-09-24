@@ -37,6 +37,9 @@ export async function applyPaymentToOrder(order: OrderRow, payment: MercadoPagoP
   if (Number.isFinite(paymentAmount)) {
     const expected = order.total_cents / 100;
     if (Math.abs(paymentAmount - expected) > 0.01) {
+      console.error(
+        `[mp] payment ${String(payment?.id ?? "")} amount ${paymentAmount} does not match order ${order.id} total ${expected}`,
+      );
       return { order, payment, updated: false as const, reason: "amount_mismatch" as const };
     }
   }
@@ -68,7 +71,11 @@ export async function applyPaymentToOrder(order: OrderRow, payment: MercadoPagoP
       mp_payment_status: status,
     };
 
-    void notifyN8nOrderPaid({ order: refreshedOrder, payment }).catch(() => {});
+    void notifyN8nOrderPaid({ order: refreshedOrder, payment })
+      .then((result) => {
+        if (!result.ok) console.error(`[n8n] paid notify for order ${order.id} failed`, result);
+      })
+      .catch((error) => console.error(`[n8n] paid notify for order ${order.id} failed`, error));
     return { order: refreshedOrder, payment, updated: true as const };
   }
 
@@ -98,6 +105,31 @@ export function scheduleOrderPaymentReconciliation(orderId: string, delaysMs = [
           await reconcileOrderPayment(order);
         } catch {
           // Best-effort reconciliation.
+        } finally {
+          scheduledPaymentChecks.delete(key);
+        }
+      })();
+    }, delayMs);
+  }
+}
+
+// Retry by payment id: card orders have no mp_payment_id until a webhook is processed,
+// so a failed first webhook would otherwise never be retried by order.
+export function schedulePaymentReconciliation(paymentId: string, delaysMs = [15000, 60000, 300000]) {
+  for (const delayMs of delaysMs) {
+    const key = `payment:${paymentId}:${delayMs}`;
+    if (scheduledPaymentChecks.has(key)) continue;
+    scheduledPaymentChecks.add(key);
+
+    setTimeout(() => {
+      void (async () => {
+        try {
+          const payment = await fetchMercadoPagoPayment(paymentId);
+          const order = getOrderById(String(payment?.external_reference || ""));
+          if (!order || order.status === "paid") return;
+          await applyPaymentToOrder(order, payment);
+        } catch (error) {
+          console.error(`[mp] scheduled reconciliation for payment ${paymentId} failed`, error);
         } finally {
           scheduledPaymentChecks.delete(key);
         }
